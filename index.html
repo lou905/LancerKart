@@ -128,6 +128,9 @@ table.lb td.t{font-family:Consolas,monospace;text-align:right}
 table.lb td.dim{color:var(--dim)}
 table.lb tr.me td{background:rgba(242,194,48,.18);color:var(--gold)}
 table.lb canvas{width:2.6cqw;vertical-align:middle;image-rendering:pixelated;border-radius:.3cqw}
+.hof{display:flex;flex-wrap:wrap;gap:.4cqw .9cqw;justify-content:center;align-items:center;background:rgba(242,194,48,.12);border:.2cqw solid var(--gold);border-radius:.8cqw;padding:.4cqw .9cqw;margin:0 auto .6cqw;max-width:80cqw;font-size:1.25cqw;color:#fff}
+.hof b{color:var(--gold);width:100%;text-align:center}
+.hof i{font-style:normal;font-family:Consolas,monospace;color:#ffe680}
 .lbNote{font-size:1.5cqw;color:var(--dim);padding:2cqh}
 #hSplits{left:2cqw;top:15cqh;font-size:1.5cqw;font-family:Consolas,monospace;color:#fff;line-height:1.4}
 #hSplits b{color:#8fe08f}
@@ -287,7 +290,7 @@ const ROSTER=[
  {id:"rich",st:[0, 1, 2, -1],tag:"Sharp Turner",name:"Miss Ritch",kc:"#c0392b",look:{skin:"#f1c9a5",hair:"#6b4a2b",long:true,glasses:true,shirt:"#7a1f2b",pants:"#1d2b4f"}},
  {id:"melissa",st:[1, 1, 0, 0],tag:"All-Rounder",name:"Melissa",kc:"#2f7d32",look:{skin:"#e9b98f",hair:"#8a5a2b",curly:true,shirt:"#2f7d32",pants:"#c9b48a"}},
  {id:"sosa",st:[1, 2, 0, -1],tag:"Never Slows Down",name:"Mr. Sousa",kc:"#16a085",look:{skin:"#b07a52",hair:"#1a1a1a",shirt:"#f2c230",pants:"#1d2b4f"}},
- {id:"mrk",st:[2, -1, 0, 1],tag:"Top Speed King",name:"Mr. K",kc:"#d4a017",look:{skin:"#e9b98f",hair:"#e6c25a",shirt:"#1d2b4f",tie:"#f2c230",pants:"#1d2b4f",suit:true}},
+ {id:"mrk",zip:1.015,st:[2, -1, 0, 1],tag:"Top Speed King",name:"Mr. K",kc:"#d4a017",look:{skin:"#e9b98f",hair:"#e6c25a",shirt:"#1d2b4f",tie:"#f2c230",pants:"#1d2b4f",suit:true}},
  {id:"msm",st:[0, 1, 1, 0],tag:"Creative Lines",name:"Ms. M",kc:"#b05ad6",look:{skin:"#e3b48a",hair:"#1a1a1a",long:true,streak:"#b05ad6",shirt:"#ffffff",pants:"#e3b48a"}},
  {id:"coachw",st:[1, 0, -1, 2],tag:"Powerhouse",name:"Coach W",kc:"#1d2b4f",look:{skin:"#5e3b26",hair:"#111111",cap:"#1d2b4f",shirt:"#1d2b4f",collar:"#f2c230",whistle:true,pants:"#c9b48a"}},
  {id:"mrt",st:[1, 1, 1, -1],tag:"In Rhythm",name:"Mr. T",kc:"#e67e22",look:{skin:"#6b4226",hair:"#1a1a1a",shirt:"#ffffff",tie:"#1d2b4f",pants:"#3a3a3a",trumpet:true}},
@@ -300,13 +303,13 @@ const ROSTER=[
 ];
 const VEH={
  kart:{name:"Go-Kart",desc:"Top speed king",max:3.35,acc:.055,turn:.043,off:.47,heavy:1},
- bike:{name:"E-Bike",desc:"Quick + nimble",max:3.18,acc:.075,turn:.05,off:.62,heavy:.7},
- cart:{name:"Golf Cart",desc:"Tough, bumps others",max:3.08,acc:.06,turn:.044,off:.72,heavy:1.7}
+ bike:{name:"E-Bike",desc:"Quick + nimble",max:3.27,acc:.075,turn:.05,off:.62,heavy:.7},
+ cart:{name:"Golf Cart",desc:"Tough, bumps others",max:3.29,acc:.06,turn:.044,off:.72,heavy:1.7}
 };
 function effStats(r,veh){ const V=VEH[veh], s=r.st||[0,0,0,0];
   const heavy=V.heavy*(1+s[3]*.35);
   // wf: weight feel, about -1 (light) to +1.5 (heaviest). Heavy = faster top end, slides wider, wins bumps; light = quick start, sharp turns, grips.
-  return {max:V.max*(1+s[0]*.03+s[3]*.014), acc:V.acc*(1+s[1]*.13-s[3]*.1), turn:V.turn*(1+s[2]*.07-s[3]*.06), off:V.off*(1+s[3]*.05), heavy, wf:clamp(Math.log2(heavy),-1,1.5)}; }
+  return {max:V.max*(1+s[0]*.009+s[2]*.004-s[3]*.004)*(r.zip||1), acc:V.acc*(1+s[1]*.1-s[3]*.07), turn:V.turn*(1+s[2]*.06-s[3]*.04), off:V.off*(1-s[3]*.02), heavy, wf:clamp(Math.log2(heavy),-1,1.5)}; }
 const DIFF={easy:{name:"Easy",desc:"Learner's permit",f:.88},normal:{name:"Normal",desc:"Varsity",f:.95},hard:{name:"Hard",desc:"Senior year",f:1.0}};
 
 /* ---------- portrait (front) ---------- */
@@ -1162,7 +1165,7 @@ function physics(k,inp){
     if(frame%3===0 && Math.hypot(k.x-player.x,k.y-player.y)<220) fx.push({img:SPR_IMG.smoke,x:bx+rnd(-3,3),y:by+rnd(-3,3),w:5,h:4,t:24,t0:24,smoke:true}); }
   k.x=clamp(k.x,20,MAP-20); k.y=clamp(k.y,20,MAP-20);
   for(const c of COLLIDERS){ const dx=k.x-c.x, dy=k.y-c.y; if(dx>40||dx<-40||dy>40||dy<-40) continue; const d=Math.hypot(dx,dy), m=c.r+4;
-    if(d<m && d>0){ k.x=c.x+dx/d*m; k.y=c.y+dy/d*m; if(Math.abs(k.v)>1.2){ k.v*=.45+.1*k.S.wf; if(k===player) SFX.bump(); } } }
+    if(d<m && d>0){ k.x=c.x+dx/d*m; k.y=c.y+dy/d*m; if(Math.abs(k.v)>1.2){ k.v*=.45; if(k===player) SFX.bump(); } } }
   const progBefore=k.prog; let best=1e12, bi=k.seg;
   for(let o=-12;o<=30;o++){ const i=(k.seg+o+N)%N; const p=TR[i]; const d=(p.x-k.x)**2+(p.y-k.y)**2; if(d<best){best=d;bi=i;} }
   let dl=bi-k.seg; if(dl<-N/2) dl+=N; if(dl>N/2) dl-=N; k.seg=bi; k.prog+=dl;
@@ -1513,15 +1516,23 @@ $("bChange").onclick=()=>{ cup=null; goSelect(); };
 /* ---- leaderboards: this computer (always) + school-wide Google Sheet (if SCHOOL_BOARD_URL is set) ---- */
 const lsGet=(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } };
 const lsSet=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } };
-const localBoard=id=>lsGet("lancerkart_tt_"+id,[]);
-function addLocal(id,e){ const L=localBoard(id); L.push(e); L.sort((a,b)=>a.t-b.t); lsSet("lancerkart_tt_"+id,L.slice(0,50)); }
-function loadGhost(id){ const g=lsGet("lancerkart_ghost_"+id,null); return g&&g.p&&g.p.length>30?g:null; }
+/* SEASON: each new season starts the boards fresh; the top 5 from Season 1 stay as a Hall of Fame */
+const SEASON=2;
+const localBoard=id=>lsGet("lancerkart_s"+SEASON+"_tt_"+id,[]);
+const localHof=id=>lsGet("lancerkart_tt_"+id,[]).slice().sort((a,b)=>a.t-b.t).slice(0,5);
+function addLocal(id,e){ const L=localBoard(id); L.push(e); L.sort((a,b)=>a.t-b.t); lsSet("lancerkart_s"+SEASON+"_tt_"+id,L.slice(0,50)); }
+const GHOST_KEY=id=>"lancerkart_s"+SEASON+"_ghost_"+id;
+function loadGhost(id){ const g=lsGet(GHOST_KEY(id),null); return g&&g.p&&g.p.length>30?g:null; }
 function cleanName(n){ return String(n||"").replace(/[^A-Za-z0-9 .'\-]/g,"").replace(/\s+/g," ").trim().slice(0,16); }
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function withTimeout(ms){ const c=new AbortController(); setTimeout(()=>c.abort(),ms); return c.signal; }
-async function fetchSchool(id){ const r=await fetch(`${SCHOOL_BOARD_URL}?action=top&course=${encodeURIComponent(id)}`,{signal:withTimeout(9000)}); if(!r.ok) throw new Error("bad"); return (await r.json()).map(x=>({n:x.n,r:x.r,v:x.v,t:+x.t,d:x.d})); }
-async function submitSchool(id,e){ const q=new URLSearchParams({action:"add",course:id,name:e.n,racer:e.r,ride:e.v,time:e.t.toFixed(2),laps:e.l.map(x=>x.toFixed(2)).join(" ")});
-  const r=await fetch(`${SCHOOL_BOARD_URL}?${q}`,{signal:withTimeout(12000)}); if(!r.ok) throw new Error("bad"); return (await r.json()).map(x=>({n:x.n,r:x.r,v:x.v,t:+x.t,d:x.d})); }
+const fixRow=x=>({n:x.n,r:x.r,v:x.v,t:+x.t,d:x.d});
+function readBoard(j){ if(Array.isArray(j)) return {rows:j.map(fixRow),hof:[]}; return {rows:(j.rows||[]).map(fixRow),hof:(j.hof||[]).map(fixRow)}; }
+async function fetchSchool(id){ const r=await fetch(`${SCHOOL_BOARD_URL}?action=top&season=${SEASON}&course=${encodeURIComponent(id)}`,{signal:withTimeout(9000)}); if(!r.ok) throw new Error("bad"); return readBoard(await r.json()); }
+async function submitSchool(id,e){ const q=new URLSearchParams({action:"add",season:SEASON,course:id,name:e.n,racer:e.r,ride:e.v,time:e.t.toFixed(2),laps:e.l.map(x=>x.toFixed(2)).join(" ")});
+  const r=await fetch(`${SCHOOL_BOARD_URL}?${q}`,{signal:withTimeout(12000)}); if(!r.ok) throw new Error("bad"); return readBoard(await r.json()); }
+function hofStrip(hof){ if(!hof||!hof.length) return "";
+  return `<div class="hof"><b>🏆 SEASON 1 HALL OF FAME</b>`+hof.slice(0,5).map((e,i)=>{ const r=ROSTER.find(x=>x.id===e.r); return `<span>${i+1}. ${esc(e.n)} <i>${fmt(e.t)}</i>${r?" · "+esc(r.name):""}</span>`; }).join("")+`</div>`; }
 function bestPerName(rows){ const seen=new Set(), out=[]; rows.slice().sort((a,b)=>a.t-b.t).forEach(e=>{ const k=String(e.n).toLowerCase().replace(/\s+/g," ").trim(); if(!seen.has(k)){ seen.add(k); out.push(e); } }); return out; }
 function boardTable(rows,hl){
   rows=rows.slice().sort((a,b)=>a.t-b.t);   // every run counts, so one student can hold several spots
@@ -1536,11 +1547,13 @@ function boardTable(rows,hl){
   return t;
 }
 async function renderBoard(el,id,source,hl,rows){
-  const head=`<div style="text-align:center;font-size:1.5cqw;color:#fff;font-weight:bold;margin-bottom:.4cqw">${source==="school"?"🏫 SCHOOL-WIDE":"💻 THIS COMPUTER"} — ${esc(COURSES.find(c=>c.id===id).name)}</div>`;
-  if(!rows){ if(source==="school"){ el.innerHTML=head+`<div class="lbNote">Loading the school leaderboard…</div>`;
-      try{ rows=await fetchSchool(id); }catch(err){ el.innerHTML=head+`<div class="lbNote">Couldn't reach the school leaderboard right now.</div>`; return; } }
-    else rows=localBoard(id); }
-  const tb=boardTable(rows,hl); el.innerHTML=head; if(typeof tb==="string") el.insertAdjacentHTML("beforeend",tb); else el.appendChild(tb);
+  let head=`<div style="text-align:center;font-size:1.5cqw;color:#fff;font-weight:bold;margin-bottom:.4cqw">${source==="school"?"🏫 SCHOOL-WIDE":"💻 THIS COMPUTER"} — ${esc(COURSES.find(c=>c.id===id).name)} — SEASON ${SEASON}</div>`;
+  let data=rows;
+  if(!data){ if(source==="school"){ el.innerHTML=head+`<div class="lbNote">Loading the school leaderboard…</div>`;
+      try{ data=await fetchSchool(id); }catch(err){ el.innerHTML=head+`<div class="lbNote">Couldn't reach the school leaderboard right now.</div>`; return; } }
+    else data={rows:localBoard(id),hof:localHof(id)}; }
+  head+=hofStrip(data.hof);
+  const tb=boardTable(data.rows,hl); el.innerHTML=head; if(typeof tb==="string") el.insertAdjacentHTML("beforeend",tb); else el.appendChild(tb);
 }
 let ttSaved=false, ttEntry=null;
 function showTTResults(){
@@ -1548,7 +1561,7 @@ function showTTResults(){
   const t=player.ftime, laps=tt.laps.slice(0,LAPS), bestLap=Math.min(...laps);
   const L=localBoard(COURSE.id), rank=L.filter(e=>e.t<t).length+1;
   const g=loadGhost(COURSE.id); const newGhost=!g||t<g.t;
-  if(newGhost) lsSet("lancerkart_ghost_"+COURSE.id,{t,r:player.r.id,v:player.veh,n:"",p:tt.rec});
+  if(newGhost) lsSet(GHOST_KEY(COURSE.id),{t,r:player.r.id,v:player.veh,n:"",p:tt.rec});
   $("ttHead").textContent= rank===1 ? "NEW RECORD!" : "TIME TRIAL COMPLETE";
   $("ttSub").textContent=`${COURSE.name} — ${player.name} on the ${VEH[player.veh].name}${newGhost?"  •  your ghost will race you next time":""}`;
   $("ttSplits").innerHTML=`<span class="tot">${fmt(t)}</span>`+laps.map((x,i)=>`<span class="lap${x===bestLap?" best":""}">LAP ${i+1}  ${fmt(x)}</span>`).join("");
@@ -1563,7 +1576,7 @@ async function saveTT(){
   if(n.replace(/[^A-Za-z]/g,"").length<2){ msg.className="bad"; msg.textContent="Please type your name first (at least 2 letters)."; $("ttName").focus(); return; }
   ttSaved=true; ttEntry.n=n; lsSet("lancerkart_lastname",n);
   const e={n,r:ttEntry.r,v:ttEntry.v,t:ttEntry.t,l:ttEntry.l,d:ttEntry.d}; addLocal(COURSE.id,e);
-  if(ttEntry.ghost){ const g=loadGhost(COURSE.id); if(g){ g.n=n; lsSet("lancerkart_ghost_"+COURSE.id,g); } }
+  if(ttEntry.ghost){ const g=loadGhost(COURSE.id); if(g){ g.n=n; lsSet(GHOST_KEY(COURSE.id),g); } }
   $("ttSave").disabled=true; $("ttSave").textContent="SAVED ✓";
   if(SCHOOL_BOARD_URL){ msg.className=""; msg.textContent="Sending your time to the school leaderboard…";
     try{ const rows=await submitSchool(COURSE.id,e); msg.textContent=`Saved to the school leaderboard, ${n}!`; renderBoard($("ttBoardWrap"),COURSE.id,"school",e,rows); }
