@@ -89,6 +89,8 @@ h2{margin:0 0 1cqh;color:var(--gold);font-size:3.4cqw;letter-spacing:.3cqw}
 .ccard .stars{font-size:1.4cqw;color:var(--gold);font-weight:bold;letter-spacing:.1cqw}
 .ccard .stars em{font-style:normal;color:#3a4a72}
 .ccard.cup{border-color:var(--gold);background:linear-gradient(#2a3d72,#16244a)}
+.ccard.locked{opacity:.62;filter:grayscale(.5)}
+.ccard.locked .stars{color:#9aa4bd}
 #courseGrid.six{grid-template-columns:repeat(6,1fr);gap:1cqw}
 #courseGrid.six .ccard b{font-size:1.75cqw} #courseGrid.six .ccard .cs{font-size:1.15cqw} #courseGrid.six .ccard .cd{font-size:1.02cqw;line-height:1.3} #courseGrid.six .ccard .stars{font-size:1.2cqw}
 #resTables{display:flex;gap:2cqw;align-items:flex-start}
@@ -310,10 +312,16 @@ const ROSTER=[
 const VEH={
  kart:{name:"Go-Kart",desc:"Top speed king",max:3.35,acc:.055,turn:.043,off:.47,heavy:1},
  bike:{name:"E-Bike",desc:"Quick + nimble",max:3.27,acc:.075,turn:.05,off:.62,heavy:.7},
- cart:{name:"Golf Cart",desc:"Tough, bumps others",max:3.29,acc:.06,turn:.044,off:.72,heavy:1.7}
+ cart:{name:"Golf Cart",desc:"Tough, bumps others",max:3.29,acc:.06,turn:.044,off:.72,heavy:1.7},
+ // Royal Steed — reward for winning the Lancer Cup. Rides like the E-Bike (same stats, so time trials stay fair).
+ horse:{name:"Royal Steed",desc:"Earned by winning the Cup",max:3.27,acc:.075,turn:.05,off:.62,heavy:.7,reward:true}
 };
+/* ---- earned unlocks (persist on this computer) ---- */
+const REWARD={ get cup(){ return lsGet("lancerkart_cupWon",0)?true:false; }, get gold(){ return lsGet("lancerkart_gold",0)?true:false; } };
+function unlockSteed(){ if(!REWARD.cup) lsSet("lancerkart_cupWon",1); }
+function unlockGold(){ if(!REWARD.gold) lsSet("lancerkart_gold",1); }
 const _OK=JSON.parse(atob("fX1dNy4xLDI3LjAsNDQwLjAsNjAuMCw5Mi4zWzoidHJhYyIsXTcuMCwyNi4wLDUwLjAsNTcwLjAsNzIuM1s6ImVraWIiLF0xLDc0LjAsMzQwLjAsNTUwLjAsNTMuM1s6InRyYWsiezoidiIsfV0xLDAuMS0sMC4xLDAuMSwwLjFbOiJzb2xyYWMiLF0xLDAuMCwwLjIsMC4xLDAuMS1bOiJzc3JtIixdMSwwLjEsMC4wLDAuMCwwLjFbOiJjcm0iLF0xLDAuMSwwLjAsMC4xLDAuMFs6InBiIixdMSwwLjIsMC4xLSwwLjEtLDAuMls6ImZlaGMiLF0xLDAuMiwwLjEsMC4xLSwwLjBbOiJ5ZGRlIixdMSwwLjEtLDAuMSwwLjEsMC4xWzoidHJtIixdMSwwLjIsMC4xLSwwLjAsMC4xWzoid2hjYW9jIixdMSwwLjAsMC4xLDAuMSwwLjBbOiJtc20iLF01MTAuMSwwLjEsMC4wLDAuMS0sMC4yWzoia3JtIixdMSwwLjEtLDAuMCwwLjIsMC4xWzoiYXNvcyIsXTEsMC4wLDAuMCwwLjEsMC4xWzoiYXNzaWxlbSIsXTEsMC4xLSwwLjIsMC4xLDAuMFs6ImhjaXIiLF0xLDAuMSwwLjIsMC4wLDAuMS1bOiJlaWhjdGlyIixdMSwwLjEtLDAuMSwwLjIsMC4wWzoiZ3JtIixdMSwwLjAsMC4xLDAuMCwwLjFbOiJ0cmQiezoiciJ7").split("").reverse().join(""));
-function _offS(rid,veh){ const V=_OK.v[veh], s=_OK.r[rid]; if(!V||!s) return null; const heavy=V[4]*(1+s[3]*.35);
+function _offS(rid,veh){ const V=_OK.v[veh==="horse"?"bike":veh], s=_OK.r[rid]; if(!V||!s) return null; const heavy=V[4]*(1+s[3]*.35);
   return {max:V[0]*(1+s[0]*.009+s[2]*.004-s[3]*.004)*s[4], acc:V[1]*(1+s[1]*.1-s[3]*.07), turn:V[2]*(1+s[2]*.06-s[3]*.04), off:V[3]*(1-s[3]*.02), heavy}; }
 function effStats(r,veh){ const V=VEH[veh], s=r.st||[0,0,0,0];
   const heavy=V.heavy*(1+s[3]*.35);
@@ -365,6 +373,12 @@ function portrait(r,size=32){
     if(L.cop){ R(9,3,14,6,"#1d2b4f"); R(8,8,16,2,"#0f1a33"); R(15,4,2,3,"#f2c230"); }
     if(L.chef){ R(9,0,14,6,L.chef); R(8,1,16,3,L.chef); R(10,6,12,2,shade(L.chef,.7)); }
     if(L.trumpet){ R(24,21,6,2,"#f2c230"); R(28,19,3,6,"#f2c230"); R(29,20,1,4,"#fff3b0"); }
+    if(L.armour){ const gd="#f2c230", gl="#fff3b0", gk="#c9971f";
+      R(5,24,22,8,gd); R(5,24,22,1,gl); R(5,30,22,1,gk); R(15,24,2,8,gk);   // breastplate + ridge
+      R(4,24,5,6,gd); R(23,24,5,6,gd); R(4,24,5,1,gl); R(23,24,5,1,gl);     // pauldrons
+      R(8,5,16,18,gd); R(8,5,16,1,gl); R(8,22,16,1,gk);                      // great helm (front)
+      R(11,13,10,2,"#241812"); R(14,15,4,1,"#241812");                       // visor cross-slit
+      R(13,1,2,5,"#c23a3a"); R(15,0,2,5,"#c23a3a"); R(17,1,2,5,"#c23a3a"); } // red plume crest
   });
 }
 
@@ -398,6 +412,11 @@ function driverBack(R,L,ox,oy){
   if(L.cop){ R(hx-1,hy-2,14,7,"#1d2b4f"); R(hx-1,hy+4,14,1,"#0f1a33"); }
   if(L.chef){ R(hx-1,hy-9,14,10,L.chef); R(hx-2,hy-8,16,4,L.chef); R(hx,hy,12,2,shade(L.chef,.7)); }
   if(L.trumpet){ R(ox+37,oy+16,7,2,"#f2c230"); R(ox+42,oy+14,3,6,"#f2c230"); }
+  if(L.armour){ const gd="#f2c230", gl="#fff3b0", gk="#c9971f";
+    R(ox+13,oy+12,22,12,gd); R(ox+13,oy+12,22,1,gl); R(ox+13,oy+21,22,1,gk); R(ox+23,oy+13,2,10,gk); // breastplate + ridge
+    R(ox+10,oy+13,5,5,gd); R(ox+33,oy+13,5,5,gd); R(ox+10,oy+13,5,1,gl); R(ox+33,oy+13,5,1,gl);       // pauldrons
+    R(hx-1,hy-1,14,12,gd); R(hx-1,hy-1,14,1,gl); R(hx-1,hy+10,14,1,gk);                                  // great helm (back)
+    R(hx+4,hy-4,2,4,"#c23a3a"); R(hx+6,hy-5,2,3,"#c23a3a"); }                                            // red plume
 }
 function vehicleSprite(r,veh,lean){
   const L=r.look, kc=r.kc;
@@ -423,6 +442,18 @@ function vehicleSprite(r,veh,lean){
       R(21,33,6,15,"#141414"); R(22,35,4,1,"#3a3a3a"); R(22,39,4,1,"#3a3a3a"); R(22,43,4,1,"#3a3a3a");
       R(19,32,10,2,shade(kc,.7)); R(22,36,4,2,"#ff3b3b");
       R(18,28,12,2,"#2a2a2a");
+    } else if(veh==="horse"){
+      // brown horse seen from behind, rider on top
+      const hd="#6b4a2b", hl="#7d5733", hdk="#4e3620";
+      R(16,40,5,8,hdk); R(27,40,5,8,hdk);            // back legs
+      R(17,47,5,2,"#2a2018"); R(27,47,5,2,"#2a2018"); // hooves
+      R(13,26,22,16,hd); R(13,26,22,2,hl);           // body/rump
+      R(14,24,20,3,hd);                               // back toward neck
+      R(22,14,8,14,hd); R(22,14,8,2,hl);             // neck rising to head (away)
+      R(21,10,10,6,hd); R(20,9,3,3,hd); R(29,9,3,3,hd); // head + ears
+      for(let i=0;i<7;i++) R(23,15+i,6,1,i%2?hdk:"#241812"); // mane down the neck
+      R(33,30,3,12,"#2a1c12");                        // tail
+      driverBack(R,L,0,2);                            // rider sits up high
     } else { // golf cart
       R(3,0,42,4,"#f7f7f2"); R(3,4,42,1,"#c9c9c0");
       R(5,4,2,27,"#cfcfc8"); R(41,4,2,27,"#cfcfc8");
@@ -520,6 +551,10 @@ const COURSES=[
    darters:[[0.025,1,.021,0],[0.05,-1,.018,2.1],[0.075,1,.024,4.2],[0.1,-1,.02,1],[0.125,1,.017,3.1],[0.06,1,.022,5.3],[0.115,-1,.023,.4]],
    pads:[[0.3,0],[0.62,8]], boxRows:[0.2,0.47,0.78],
    sky:["#4a9be8","#cfe8ff"], fog:"200,226,250", out:[62,128,48], splash:"SPLASH! The ducks are not impressed" },
+ { id:"castle", name:"Camelot Keep", sub:"Medieval • Castle • Royal Steed", theme:"castle", CP:CAMPUS_CP, stars:3, label:"ROYAL", special:true, tw:62, aiBoost:.05,
+   desc:"The campus, centuries ago. Race the cobblestone road past the castle keep, round the moat, and under the banners. Win the Cup to ride the Royal Steed here!",
+   water:[{e:[690,1150,120,80]}], pads:[[0.07,-14],[0.44,12],[0.62,-12],[0.9,10]], boxRows:[0.19,0.5,0.8],
+   sky:["#3a4a74","#d9b98a"], skyMid:"#8f7aa0", fog:"215,200,175", out:[70,96,58], splash:"SPLASH! Into the moat!" },
  { id:"bonus", name:"Bonus Round", sub:"Recess Rampage • 5 laps", theme:"bonus", CP:BONUS_CP, stars:3, label:"BONUS", laps:5, tw:64, aiBoost:.05, chasers:true,
    desc:"5 laps past the playgrounds. Jump the creek bridge, dodge tires and dodgeballs. Eddy is chasing you, and Mr. C yells SHAME if you hit the grass!",
    water:[{path:[[830,1560],[840,1440],[862,1330],[905,1220],[965,1120]],w:112,bridge:true},{e:[1035,1035,100,62]}],
@@ -529,7 +564,8 @@ const COURSES=[
    sky:["#4a9be8","#d2ecff"], fog:"200,230,255", out:[62,128,48], splash:"SPLASH! Into the creek!" }
 ];
 
-const CUP_COURSES=COURSES.filter(c=>!c.chasers), CUPN=CUP_COURSES.length;   // Lancer Way, Tampa, Storm Day, Carloop Chaos
+const CUP_COURSES=COURSES.filter(c=>!c.chasers && !c.special), CUPN=CUP_COURSES.length;   // Lancer Way, Tampa, Storm Day, Carloop Chaos
+const CUP_RACES=4;   // how many courses make up one Cup
 /* ---------------- TEXTURE + SURFACE ---------------- */
 const texC=document.createElement("canvas"); texC.width=texC.height=MAP; const tg=texC.getContext("2d",{willReadFrequently:true});
 const surC=document.createElement("canvas"); surC.width=surC.height=MAP; const sg=surC.getContext("2d",{willReadFrequently:true});
@@ -608,6 +644,25 @@ function paintCampus(g,storm){
     srand(21); g.fillStyle="rgba(170,195,230,.18)"; for(let i=0;i<N;i+=1){ const p=TR[i]; const l=(sr()-.5)*TW*.8; g.fillRect(p.x+p.nx*l,p.y+p.ny*l,2+sr()*6,1); }
     shallowShapes(g,true); puddleShapes(g,true); floodShapes(g,true); }
   else { strokeTrack(g,TW-2,"#5b6070"); g.lineWidth=2; strokeTrack(g,2,"rgba(255,255,255,.5)",[18,26]); }
+  startLine(g); padShapes(g,true);
+}
+/* ---------------- CAMELOT KEEP (medieval) ---------------- */
+const cobblePat=mk(24,24,(g,R)=>{ R(0,0,24,24,"#8f8a80"); srand(55);
+  for(let y=0;y<4;y++) for(let x=-1;x<5;x++){ const px=x*6+(y%2?3:0); const col=["#9c978c","#8a857b","#a39e92","#827d74","#948f84"][Math.floor(sr()*5)];
+    R(px,y*6,5,5,col); R(px,y*6,5,1,shade(col,1.12)); R(px,y*6+4,5,1,shade(col,.82)); } });
+function paintCastle(g){
+  g.fillStyle="#5f8a3e"; g.fillRect(0,0,MAP,MAP);                       // meadow
+  g.save(); g.translate(MAP/2,MAP/2); g.rotate(Math.PI/4); g.fillStyle="#6a9647";
+  for(let i=-MAP*1.5;i<MAP*1.5;i+=84) g.fillRect(i,-MAP*1.5,40,MAP*3); g.restore();
+  srand(7); for(let i=0;i<70;i++){ g.fillStyle="rgba(120,150,90,.35)"; ell(g,sr()*MAP,sr()*MAP,7+sr()*18,4+sr()*9); }
+  strokeTrack(g,TW+46,"#6f5a3a");                                       // dirt shoulder
+  paintDeep(g,"#6b5a3c",10,"#355a86","#4a74a6");                        // the moat
+  strokeTrack(g,TW+14,"#3a2f24");
+  strokeTrack(g,TW+14,"#c9971f",[12,12]);                              // gold dashes
+  strokeTrack(g,TW+2,"#efe6d2");
+  g.lineWidth=TW-2; g.strokeStyle=g.createPattern(cobblePat,"repeat"); trackPath(g); g.stroke();  // cobblestone road
+  strokeTrack(g,TW-2,"rgba(60,45,25,.12)");
+  g.lineWidth=2; strokeTrack(g,2,"rgba(255,250,235,.45)",[16,24]);
   startLine(g); padShapes(g,true);
 }
 /* ---------------- CARLOOP CHAOS ---------------- */
@@ -950,6 +1005,37 @@ function campusScenery(storm){
       const b=at(f0-0.004,sd*(TW/2+16)); SCENERY.push({img:SPR_IMG.sandbags,x:b.x,y:b.y,w:13,h:7}); COLLIDERS.push({x:b.x,y:b.y,r:5}); } } }
   scatter(190,22,260,TREE);
 }
+/* ---- Camelot Keep scenery (built inline so no shared sprite table is touched) ---- */
+const CASTLE_SPR={
+  keep:mk(96,120,(g,R)=>{ const s="#8f897d",sd="#726c62",sl="#a39d90";
+    R(14,40,68,80,s); R(14,40,68,3,sl); R(14,117,68,3,sd);           // main wall
+    for(let x=14;x<82;x+=16){ R(x,34,10,8,s); R(x,34,10,2,sl); }      // battlements
+    R(30,22,36,96,s); R(30,22,36,3,sl);                               // central tower taller
+    for(let x=30;x<66;x+=12){ R(x,16,8,8,s); }                        // tower battlements
+    R(44,8,8,12,"#7a1f2b"); g.fillStyle="#f2c230"; g.beginPath(); g.moveTo(44,8); g.lineTo(44,2); g.lineTo(58,5); g.lineTo(44,8); g.fill(); // flag
+    R(40,86,16,34,"#4a3826"); g.fillStyle="#2a1c12"; g.beginPath(); g.arc(48,88,8,Math.PI,0); g.fill(); // gate arch
+    for(const wx of [22,66]){ R(wx,54,6,10,"#2a2438"); R(wx,74,6,10,"#2a2438"); }  // windows
+    R(44,32,8,8,"#2a2438"); }),
+  tower:mk(40,80,(g,R)=>{ const s="#948e82",sl="#aaa49a",sd="#767064";
+    R(10,20,20,60,s); R(10,20,20,3,sl); R(10,77,20,3,sd);
+    for(let x=10;x<30;x+=8){ R(x,14,5,7,s); }
+    g.fillStyle="#7a1f2b"; g.beginPath(); g.moveTo(10,14); g.lineTo(30,14); g.lineTo(20,0); g.fill();  // conical roof
+    R(16,34,8,12,"#2a2438"); R(16,52,8,12,"#2a2438"); }),               // arrow-slit windows
+  banner:mk(20,56,(g,R)=>{ R(9,0,2,56,"#4a3826"); const c=["#7a1f2b","#1d4e89","#2f7d32","#6a2e8f"][Math.floor(Math.random()*4)];
+    R(2,6,16,30,c); R(2,6,16,3,shade(c,1.2)); g.fillStyle=c; g.beginPath(); g.moveTo(2,36); g.lineTo(18,36); g.lineTo(10,48); g.fill();
+    R(8,14,4,4,"#f2c230"); R(6,20,8,2,"#f2c230"); }),                   // heraldic banner
+  fir:mk(28,40,(g,R)=>{ R(12,30,4,10,"#5a3b22"); for(let i=0;i<4;i++){ const w=22-i*4, y=4+i*7; g.fillStyle=i%2?"#2f6b35":"#357a3c"; g.beginPath(); g.moveTo(14,y-4); g.lineTo(14-w/2,y+6); g.lineTo(14+w/2,y+6); g.fill(); } })
+};
+function castleScenery(){
+  addGate(SPR_IMG.gate);
+  // the keep dominates the infield where the stadium sits on campus
+  { const a=at(0.755,TW/2+66); SCENERY.push({img:CASTLE_SPR.keep,x:a.x,y:a.y,w:140,h:170}); COLLIDERS.push({x:a.x,y:a.y,r:58}); }
+  // round towers around the circuit
+  [[0.075,-1],[0.355,1],[0.56,1],[0.875,-1]].forEach(([f,sd])=>{ const a=placeBeside(f,sd,TW/2+52,42); if(a){ SCENERY.push({img:CASTLE_SPR.tower,x:a.x,y:a.y,w:70,h:140}); COLLIDERS.push({x:a.x,y:a.y,r:42}); } });
+  // banners lining both sides near the start
+  for(let i=0;i<8;i++) for(const sd of [-1,1]){ const a=at(0.015+i*0.012,sd*(TW/2+10)); SCENERY.push({img:CASTLE_SPR.banner,x:a.x,y:a.y,w:12,h:34}); COLLIDERS.push({x:a.x,y:a.y,r:2}); }
+  scatter(190,22,260,()=>({img:CASTLE_SPR.fir,w:26,h:38,r:4,space:18}));
+}
 let OBST=[], BALLS=[];
 function bonusScenery(tg){
   addGate(SPR_IMG.gateBonus);
@@ -1018,6 +1104,14 @@ function makeSky(theme){ return mk(SKYW,HOR,(g,R)=>{ srand(theme.length*977);
     for(let i=0;i<70;i++){ const x=sr()*SKYW, y=sr()*44, s=14+sr()*26; g.fillStyle=sr()<.5?"rgba(60,68,80,.9)":"rgba(82,90,104,.85)";
       for(let k=0;k<4;k++) ell(g,x+k*s*.7,y+(k%2)*3,s,s*.5); }
     g.strokeStyle="rgba(190,200,215,.25)"; g.lineWidth=1; for(let i=0;i<120;i++){ const x=sr()*SKYW, y=sr()*HOR; g.beginPath(); g.moveTo(x,y); g.lineTo(x-3,y+10); g.stroke(); }
+  } else if(theme==="castle"){
+    g.fillStyle="#ffe9c0"; ell(g,360,HOR-30,15,15); g.fillStyle="rgba(255,233,192,.25)"; ell(g,360,HOR-30,28,28); // low sun
+    for(let i=0;i<16;i++){ const x=sr()*SKYW, y=10+sr()*30, s=10+sr()*18; g.fillStyle="rgba(240,225,235,.7)"; for(let k=0;k<4;k++) ell(g,x+k*s*.7,y+(k%2)*2,s,s*.45); }
+    g.fillStyle="#3a3350"; for(let x=0;x<SKYW;x+=4){ const h=6+Math.sin(x*.03)*4+sr()*4; g.fillRect(x,HOR-h,4,h); } // distant hills
+    const bx=980; g.fillStyle="#2f2a44"; g.fillRect(bx,HOR-34,120,34);           // far-off castle on the ridge
+    for(let x=bx;x<bx+120;x+=14) g.fillRect(x,HOR-40,8,8);
+    g.fillRect(bx+48,HOR-52,24,52); for(let x=bx+48;x<bx+72;x+=10) g.fillRect(x,HOR-58,6,8);
+    g.fillStyle="#7a1f2b"; g.fillRect(bx+58,HOR-66,2,8); g.beginPath(); g.moveTo(bx+60,HOR-66); g.lineTo(bx+70,HOR-63); g.lineTo(bx+60,HOR-60); g.fill();
   } else {
     for(let i=0;i<26;i++){ const x=sr()*SKYW, y=8+sr()*40, s=8+sr()*16; g.fillStyle="rgba(255,255,255,.9)";
       for(let k=0;k<4;k++){ g.beginPath(); g.ellipse(x+k*s*.7,y+(k%2)*2,s,s*.45,0,0,7); g.fill(); } }
@@ -1034,7 +1128,7 @@ function buildCourse(def){
   tg.setLineDash([]); tg.globalAlpha=1;
   if(def.theme==="bonus"){ def._br=bridgeAt(); if(!def._pads0) def._pads0=def.pads; def.pads=def._pads0.concat([[((def._br.i-9)%N)/N,0]]); }
   if(def.theme==="carloop" && !def._kind) prepCarloop(def);
-  if(def.theme==="city") paintCity(tg); else if(def.theme==="bonus") paintBonus(tg); else if(def.theme==="carloop") paintCarloop(tg); else paintCampus(tg,def.theme==="storm");
+  if(def.theme==="city") paintCity(tg); else if(def.theme==="bonus") paintBonus(tg); else if(def.theme==="carloop") paintCarloop(tg); else if(def.theme==="castle") paintCastle(tg); else paintCampus(tg,def.theme==="storm");
   // surface map: 0 off-road, 1 road, 2 boost, 3 puddle/flood, 4 deep water
   sg.setLineDash([]); sg.fillStyle="#000"; sg.fillRect(0,0,MAP,MAP);
   sg.fillStyle="#0000ff"; for(const s of def.water) if(!s.shallow) waterShape(sg,s,-4);
@@ -1050,6 +1144,7 @@ function buildCourse(def){
     tg.lineCap="round"; for(const sd2 of [-1,1]){ const pts=RAILS.filter(r=>r.sd===sd2);
       for(let k=1;k<pts.length;k++){ if(pts[k].i-pts[k-1].i!==1) continue; tg.strokeStyle="#efe8d6"; tg.lineWidth=3; tg.beginPath(); tg.moveTo(pts[k-1].x,pts[k-1].y); tg.lineTo(pts[k].x,pts[k].y); tg.stroke(); } } }
   else if(def.theme==="bonus") bonusScenery(tg);
+  else if(def.theme==="castle") castleScenery();
   else if(def.theme==="carloop") carloopScenery(tg);
   else campusScenery(def.theme==="storm");
   const im=tg.getImageData(0,0,MAP,MAP); const d=im.data; srand(1234567);
@@ -1121,7 +1216,10 @@ const SONGS={
     bass:"funk", arp:true, kick:"x...x...x..xx...", snare:"....x.......x...", hat:"x.x.xxx.x.x.xxx." },
   bonus:{ bpm:162, chords:["G","Em","C","D","G","Em","A","D"],
     lead:"G5 . B5 . D6 . B5 G5  E5 . G5 . B5 . G5 E5  C5 . E5 G5 C6 . G5 E5  D5 . F#5 . A5 . . -  G5 B5 D6 . B5 G5 D5 .  E5 . G5 B5 E6 . D6 B5  A5 . C#6 . E6 . C#6 A5  D6 . . A5 F#5 . D5 .",
-    bass:"bounce", arp:true, kick:"x...x...x...x.x.", snare:"....x.......x...", hat:"xxx.xxx.xxx.xxxx" }
+    bass:"bounce", arp:true, kick:"x...x...x...x.x.", snare:"....x.......x...", hat:"xxx.xxx.xxx.xxxx" },
+  castle:{ bpm:132, chords:["Dm","Dm","Gm","A","Dm","Bb","Gm","A"],
+    lead:"D5 . . A4 D5 . F5 .  E5 . . C5 E5 . G5 .  G5 . . D5 G5 . Bb5 .  A5 . . E5 A5 . . -  D5 . F5 . A5 . F5 D5  Bb4 . D5 . F5 . D5 Bb4  G4 . Bb4 . D5 . Bb4 G4  A4 . . E5 A4 . . -",
+    bass:"bounce", arp:true, kick:"x.......x.......", snare:"....x.......x...", hat:"x...x...x...x..." }
 };
 const NOTE_IDX={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
 function midi(n){ const m=/^([A-G])([#b]?)(\d)$/.exec(n); if(!m) return null; return 12*(+m[3]+1)+NOTE_IDX[m[1]]+(m[2]==="#"?1:m[2]==="b"?-1:0); }
@@ -1194,16 +1292,19 @@ let camA=0, camX=0, camY=0, msgT=0, gasStartCount=null, flash=0, boltT=6, lastCo
 let pick={racer:ROSTER[0], veh:"kart", diff:"normal"}, cup=null, mode="race", tt=null;
 let pick2={racer:ROSTER[7], veh:"bike"}, selectingP2=false, humans=[], duoFirst=0;
 
+let WEAR_ARMOUR=false;
 function makeKart(r,veh,ai,slot){
-  const fr=[-1,0,1].map(l=>vehicleSprite(r,veh,l));
-  const frB = r.id==="ritchie" ? [-1,0,1].map(l=>vehicleSprite({...r,look:{...r.look,hat:null}},veh,l)) : null;
+  const ar = (!ai && WEAR_ARMOUR) ? {...r,look:{...r.look,armour:true}} : r;
+  const fr=[-1,0,1].map(l=>vehicleSprite(ar,veh,l));
+  const frB = ar.id==="ritchie" ? [-1,0,1].map(l=>vehicleSprite({...ar,look:{...ar.look,hat:null}},veh,l)) : null;
   const gi=N-6-Math.floor(slot/2)*3; const gp=TR[(gi+N)%N]; const lat=slot%2?12:-12;
   return { r, name:r.name, veh, ai, fr, frB, S:effStats(r,veh), look:0, precision:1, shineT:r.id==="ritchie"?rnd(7,12)*60:0, shine:0, blind:0, demerit:r.id==="mrc"?1:0, demAt:rnd(.5,2.2)*N, detention:0, slip:0, x:gp.x+gp.nx*lat, y:gp.y+gp.ny*lat, a:gp.ang, ma:gp.ang, v:0, seg:(gi+N)%N, prog:gi-N,
     maxLap:0, done:false, ftime:0, item:null, roll:0, boost:0, gold:0, spin:0, spinVis:0, drift:false, ddir:0, dT:0, hop:0,
-    steer:0, splash:0, lat:rnd(-14,14), latT:0, skill:1, band:1, cool:0, place:slot+1, wet:0, portrait:portrait(r) };
+    steer:0, splash:0, lat:rnd(-14,14), latT:0, skill:1, band:1, cool:0, place:slot+1, wet:0, portrait:portrait(ar) };
 }
 function startRace(){
   audioInit(); if(AC&&AC.state==="suspended") AC.resume();
+  WEAR_ARMOUR = REWARD.gold && !!pick.armour;
   hideScreens(); state="count"; paused=false;
   const duo=mode==="duo";
   // Mr. C patrols the grass on every course (Eddy only on the Bonus Round), so he isn't in the race field
@@ -1233,7 +1334,7 @@ function startRace(){
   if(tt && tt.ghost && tt.ghost.school) tt.ghost.name="SCHOOL RECORD · "+(tt.ghost.n||"");
   raceT=0; countT=4.4; finishT=0; frame=0; gasStartCount=null; camA=player.a; lastCount=5; flash=0; boltT=rnd(4,8);
   for(const h of humans){ h.camA=h.a; h.gsc=null; h.msg=""; h.msgT=0; } updateCam();
-  say((mode==="tt"?"TIME TRIAL — ":cup?`RACE ${cup.i+1}/${CUPN} — `:"")+COURSE.name.toUpperCase(),1.3,true);
+  say((mode==="tt"?"TIME TRIAL — ":cup?`RACE ${cup.i+1}/${cup.courses.length} — `:"")+COURSE.name.toUpperCase(),1.3,true);
   $("hSplits").classList.toggle("hide",mode!=="tt"); $("hSplits").innerHTML="";
   $("hHelp").classList.remove("hide"); setTimeout(()=>$("hHelp").classList.add("hide"),9000);
   setHud(true); glare=0; glareSrc=null; $("tDem").classList.add("hide");
@@ -1758,17 +1859,17 @@ function showResults(){
   $("res").classList.toggle("cup",!!cup);
   if(cup){
     const all=[player,...karts.filter(k=>k!==player)].map(k=>({k,p:cup.pts[k.r.id]||0})).sort((a,b)=>b.p-a.p);
-    st.innerHTML=`<tr><th colspan="4">LANCER CUP — ${cup.i<CUPN?"AFTER RACE "+cup.i+" OF "+CUPN:"FINAL STANDINGS"}</th></tr>`;
+    st.innerHTML=`<tr><th colspan="4">LANCER CUP — ${cup.i<cup.courses.length?"AFTER RACE "+cup.i+" OF "+cup.courses.length:"FINAL STANDINGS"}</th></tr>`;
     all.forEach((r,i)=>{ const tr=document.createElement("tr"); if(r.k===player) tr.className="me"; tr.innerHTML=`<td class="p">${ord(i+1)}</td><td></td><td>${r.k.name}</td><td class="t">${r.p} pts</td>`; tr.children[1].appendChild(face(r.k.r)); st.appendChild(tr); });
-    if(cup.i>=CUPN){ const champ=all[0].k===player; $("resHead").textContent=champ?"CUP CHAMPION!":"CUP COMPLETE"; if(champ) SFX.win();
+    if(cup.i>=cup.courses.length){ const champ=all[0].k===player; $("resHead").textContent=champ?"CUP CHAMPION!":"CUP COMPLETE"; if(champ){ SFX.win(); const wasLocked=!REWARD.cup; unlockSteed(); if(wasLocked){ setTimeout(()=>say("🏇 CUP WON! Royal Steed + Camelot Keep unlocked!",3.4,true),700); } }
       $("resSub").textContent= champ ? `${player.name} wins the Lancer Cup with ${all[0].p} points!` : `${all[0].k.name} wins the Lancer Cup. ${player.name} finished ${ord(all.findIndex(r=>r.k===player)+1)} overall.`; }
   }
-  const more = cup && cup.i<CUPN;
+  const more = cup && cup.i<cup.courses.length;
   $("bNext").classList.toggle("hide",!more); $("bAgain").classList.toggle("hide",more); $("bCourse").classList.toggle("hide",more);
   $("bAgain").textContent = cup ? "PLAY CUP AGAIN" : "RACE AGAIN";
   setHud(false); $("res").classList.remove("hide"); (more?$("bNext"):$("bAgain")).focus();
 }
-$("bNext").onclick=()=>{ buildCourse(CUP_COURSES[cup.i]); startRace(); };
+$("bNext").onclick=()=>{ buildCourse(cup.courses[cup.i]); startRace(); };
 $("bAgain").onclick=()=>{ if(cup){ startCup(); } else startRace(); };
 $("bCourse").onclick=()=>{ cup=null; goCourse(); };
 $("bChange").onclick=()=>{ cup=null; goSelect(); };
@@ -1835,7 +1936,10 @@ function showTTResults(){
   const g=loadGhost(COURSE.id); const newGhost=!tt.flagged&&(!g||t<g.t);
   if(newGhost) lsSet(GHOST_KEY(COURSE.id),{t,r:player.r.id,v:player.veh,n:"",p:tt.rec});
   $("ttHead").textContent= rank===1 ? "NEW RECORD!" : "TIME TRIAL COMPLETE";
+  // first place on this course earns Gold Armour the racer can wear
+  const wonGold = rank===1 && !tt.flagged && !REWARD.gold; if(rank===1 && !tt.flagged) unlockGold();
   $("ttSub").textContent=`${COURSE.name} — ${player.name} on the ${VEH[player.veh].name}${newGhost?"  •  your ghost will race you next time":""}`;
+  if(wonGold){ $("ttHead").textContent="🥇 1ST PLACE — GOLD ARMOUR UNLOCKED!"; $("ttSub").textContent=`${player.name} tops ${COURSE.name}! Turn on Gold Armour on the racer-select screen.`; setTimeout(()=>say("🥇 GOLD ARMOUR UNLOCKED — wear it from the racer screen!",3.2,true),400); }
   $("ttSplits").innerHTML=`<span class="tot">${fmt(t)}</span>`+laps.map((x,i)=>`<span class="lap${x===bestLap?" best":""}">LAP ${i+1}  ${fmt(x)}</span>`).join("");
   ttSaved=false; ttEntry={n:"",r:player.r.id,v:player.veh,t:+t.toFixed(2),l:laps.map(x=>+x.toFixed(2)),d:Date.now(),ghost:newGhost,trace:encTrace(tt.rec)};
   $("ttEntry").classList.remove("hide"); $("ttSave").disabled=false; $("ttSave").textContent="SAVE MY TIME";
@@ -1870,7 +1974,13 @@ function drawBoard(){
   renderBoard($("bdTable"),bd.id,bd.src,null);
 }
 $("bdBack").onclick=()=>{ hideScreens(); if(bd.from==="ttRes"){ state="results"; $("ttRes").classList.remove("hide"); } else goCourse(); };
-function startCup(){ cup={i:0,pts:{},others:null}; buildCourse(CUP_COURSES[0]); startRace(); }
+function startCup(){
+  // randomize which courses make up this cup, and their order. Once the Cup is won, Camelot Keep joins the pool.
+  const pool = REWARD.cup ? COURSES.filter(c=>!c.chasers && (!c.special || c.id==="castle")) : CUP_COURSES.slice();
+  const courses = pool.slice().sort(()=>Math.random()-.5).slice(0, Math.min(CUP_RACES, pool.length));
+  cup={i:0,pts:{},others:null,courses};
+  buildCourse(courses[0]); startRace();
+}
 
 /* ---------------- MENUS ---------------- */
 function goSelect(){ audioInit(); state="select"; hideScreens(); setHud(false); $("select").classList.remove("hide"); buildSelect(); }
@@ -1883,7 +1993,7 @@ $("mTT").onclick=()=>{ mode="tt"; buildCourseCards(); };
 $("mDuo").onclick=()=>{ mode="duo"; if(!pick2.chosen){ selectingP2=true; goSelect(); } else buildCourseCards(); };
 function thumb(def){ const T=def._tr||(def._tr=spline(def.CP)); const [a,b,c,d]=bounds(T); const sc=Math.min(190/(c-a),110/(d-b)), cx=(a+c)/2, cy=(b+d)/2;
   const P=(x,y)=>[(x-cx)*sc+110,(y-cy)*sc+65];
-  return mk(220,130,(g)=>{ const bg={campus:["#4c9a38","#57a842"],city:["#6f7480","#5d616a"],storm:["#355f33","#2c4d2b"],bonus:["#57a842","#6bb84f"],carloop:["#4f8f3e","#5b9c48"]}[def.theme];
+  return mk(220,130,(g)=>{ const bg={campus:["#4c9a38","#57a842"],city:["#6f7480","#5d616a"],storm:["#355f33","#2c4d2b"],bonus:["#57a842","#6bb84f"],carloop:["#4f8f3e","#5b9c48"],castle:["#5f8a3e","#6a9647"]}[def.theme];
     g.fillStyle=bg[0]; g.fillRect(0,0,220,130); g.fillStyle=bg[1]; for(let i=-130;i<220;i+=18) g.fillRect(i,0,9,130);
     if(def.theme==="city"){ g.fillStyle="rgba(255,150,80,.18)"; g.fillRect(0,0,220,130); }
     g.save(); g.beginPath(); g.rect(0,0,220,130); g.clip();
@@ -1907,7 +2017,7 @@ function buildCourseCards(){
     info.appendChild(pc);
     info.insertAdjacentHTML("beforeend",`<b>${esc(pick.racer.name)} vs ${esc(pick2.racer.name)}</b><span class="cs">P1: WASD · L-Shift drift · E item</span><span class="cd">P2: Arrows · R-Shift or / drift · Enter item. Mr. C uses his demerit with the item key.</span><span class="cb"><u id="chgP2" style="cursor:pointer">Change Player 2 ▸</u></span>`);
     grid.appendChild(info); info.querySelector("#chgP2").onclick=()=>{ selectingP2=true; goSelect(); };
-    COURSES.filter(c=>!c.chasers).forEach(c=>{ const b=document.createElement("button"); b.className="ccard"; b.appendChild(thumb(c));
+    COURSES.filter(c=>!c.chasers && (!c.special||REWARD.cup)).forEach(c=>{ const b=document.createElement("button"); b.className="ccard"; b.appendChild(thumb(c));
       b.insertAdjacentHTML("beforeend",`<span class="stars">${"★".repeat(c.stars)}<em>${"★".repeat(3-c.stars)}</em> ${c.label||["EASY","MEDIUM","HARD"][c.stars-1]}</span><b>${c.name}</b><span class="cs">${c.sub}</span><span class="cd">Race each other plus 6 bots. Beat your friend to the line!</span><span class="cb">&nbsp;</span>`);
       b.onclick=()=>{ cup=null; buildCourse(c); startRace(); }; grid.appendChild(b); });
     return;
@@ -1917,7 +2027,7 @@ function buildCourseCards(){
   if(mode==="tt"){
     const gt=$("ghostTabs"); gt.innerHTML="<span style='align-self:center;font-weight:bold;color:#fff;font-size:1.3cqw'>RACE AGAINST:</span>";
     [["mine","MY BEST GHOST"],...(SCHOOL_BOARD_URL?[["school","SCHOOL RECORD GHOST"]]:[]),["off","NO GHOST"]].forEach(([k,l])=>{ const b=document.createElement("button"); b.className="mtab"+(ghostPref===k?" on":""); b.textContent=l; b.onclick=()=>{ ghostPref=k; lsSet("lancerkart_ghostpref",k); buildCourseCards(); }; gt.appendChild(b); });
-    COURSES.forEach(c=>{ const b=document.createElement("button"); b.className="ccard"; b.appendChild(thumb(c)); const L=localBoard(c.id); const g=loadGhost(c.id);
+    COURSES.forEach(c=>{ if(c.special && !REWARD.cup) return; const b=document.createElement("button"); b.className="ccard"; b.appendChild(thumb(c)); const L=localBoard(c.id); const g=loadGhost(c.id);
       b.insertAdjacentHTML("beforeend",`<span class="stars">${"★".repeat(c.stars)}<em>${"★".repeat(3-c.stars)}</em> ${c.label||["EASY","MEDIUM","HARD"][c.stars-1]}</span><b>${c.name}</b><span class="cs">${c.laps||3} laps • 3 Hall Passes${g?" • race your ghost":""}</span><span class="cd">${c.chasers?"No rivals or items — but Eddy and Mr. C are still on patrol!":c.darters?"No rivals or items — watch for cars backing out, and Mr. C is watching the grass!":"No rivals or items — just you, the clock, and Mr. C watching the grass."}</span><span class="cb">${L.length?"Best here: "+fmt(L[0].t)+" — "+esc(L[0].n):"No times on this computer yet"}</span>`);
       b.onclick=async()=>{ cup=null; pendingGhost=null;
         if(ghostPref==="school" && SCHOOL_BOARD_URL){ b.querySelector(".cb").textContent="Loading the school record ghost…";
@@ -1929,17 +2039,20 @@ function buildCourseCards(){
     b.onclick=()=>openBoard("campus","courseSel"); grid.appendChild(b);
     return;
   }
-  COURSES.forEach((c,i)=>{ const b=document.createElement("button"); b.className="ccard"; b.appendChild(thumb(c));
+  COURSES.forEach((c,i)=>{ const locked=c.special && !REWARD.cup; const b=document.createElement("button"); b.className="ccard"+(locked?" locked":""); b.appendChild(thumb(c));
     const best=getBest(c.id);
-    b.insertAdjacentHTML("beforeend",`<span class="stars">${"★".repeat(c.stars)}<em>${"★".repeat(3-c.stars)}</em> ${c.label||["EASY","MEDIUM","HARD"][c.stars-1]}</span><b>${c.name}</b><span class="cs">${c.sub}</span><span class="cd">${c.desc}</span><span class="cb">${best?"Best: "+fmt(best.t)+" — "+best.name:"&nbsp;"}</span>`);
-    b.onclick=()=>{ cup=null; buildCourse(c); startRace(); }; grid.appendChild(b); });
+    if(locked){ b.insertAdjacentHTML("beforeend",`<span class="stars">🔒 LOCKED</span><b>${c.name}</b><span class="cs">${c.sub}</span><span class="cd">Win the Lancer Cup to unlock Camelot Keep and the Royal Steed!</span><span class="cb">&nbsp;</span>`);
+      b.onclick=()=>say("Win the Lancer Cup to unlock Camelot Keep!",2.4,true); }
+    else { b.insertAdjacentHTML("beforeend",`<span class="stars">${"★".repeat(c.stars)}<em>${"★".repeat(3-c.stars)}</em> ${c.label||["EASY","MEDIUM","HARD"][c.stars-1]}</span><b>${c.name}</b><span class="cs">${c.sub}</span><span class="cd">${c.desc}</span><span class="cb">${best?"Best: "+fmt(best.t)+" — "+best.name:"&nbsp;"}</span>`);
+      b.onclick=()=>{ cup=null; buildCourse(c); startRace(); }; }
+    grid.appendChild(b); });
   const b=document.createElement("button"); b.className="ccard cup";
   const tc=mk(220,130,(g,R)=>{ g.fillStyle="#24386b"; g.fillRect(0,0,220,130); g.fillStyle="#f2c230";
     g.beginPath(); g.moveTo(80,22); g.lineTo(140,22); g.lineTo(136,58); g.quadraticCurveTo(110,84,84,58); g.closePath(); g.fill();
     g.lineWidth=6; g.strokeStyle="#f2c230"; g.beginPath(); g.arc(80,38,13,Math.PI*.5,Math.PI*1.5); g.stroke(); g.beginPath(); g.arc(140,38,13,-Math.PI*.5,Math.PI*.5); g.stroke();
-    R(104,72,12,16,"#d4a017"); R(88,88,44,10,"#d4a017"); R(84,98,52,8,"#7a1f2b"); label(g,CUPN+" RACES",110,117,12,"#ffffff"); label(g,"1",110,44,20,"#1d2b4f"); });
+    R(104,72,12,16,"#d4a017"); R(88,88,44,10,"#d4a017"); R(84,98,52,8,"#7a1f2b"); label(g,CUP_RACES+" RACES",110,117,12,"#ffffff"); label(g,"1",110,44,20,"#1d2b4f"); });
   b.appendChild(tc);
-  b.insertAdjacentHTML("beforeend",`<b>Lancer Cup</b><span class="cs">${CUPN} courses in a row</span><span class="cd">Race every course against the same 7 rivals. 15 points for 1st, 12 for 2nd, 10 for 3rd… most points wins the cup!</span><span class="cb">&nbsp;</span>`);
+  b.insertAdjacentHTML("beforeend",`<b>Lancer Cup</b><span class="cs">${CUP_RACES} random courses</span><span class="cd">${CUP_RACES} courses picked at random, same 7 rivals. 15 pts for 1st, 12 for 2nd, 10 for 3rd… most points wins the cup! ${REWARD.cup?"Camelot Keep is now in the mix.":"Win it to unlock the Royal Steed & a secret course."}</span><span class="cb">&nbsp;</span>`);
   b.onclick=()=>{ mode="race"; startCup(); }; grid.appendChild(b);
 }
 function buildSelect(){
@@ -1947,17 +2060,25 @@ function buildSelect(){
   $("select").querySelector("h2").textContent = selectingP2 ? "PLAYER 2 — CHOOSE YOUR RACER" : (mode==="duo"?"PLAYER 1 — CHOOSE YOUR RACER":"CHOOSE YOUR RACER");
   $("diffOpts").parentElement.style.visibility = selectingP2 ? "hidden" : "";
   { const pick=pk; buildSelectFor(pick); } }
+const armoured=(r,on)=>on?{...r,look:{...r.look,armour:true}}:r;
 function buildSelectFor(pick){
+  if(pick.veh==="horse" && !REWARD.cup) pick.veh="bike";           // safety: can't keep a locked ride
+  if(pick.armour && !REWARD.gold) pick.armour=false;
+  const arm=REWARD.gold&&pick.armour;
   const grid=$("grid"); grid.innerHTML="";
   ROSTER.forEach(r=>{ const b=document.createElement("button"); b.className="card"+(r===pick.racer?" on":"");
     b.appendChild(face(r)); b.appendChild(document.createTextNode(r.name));
     b.onclick=()=>{ pick.racer=r; if(r.veh) pick.veh=r.veh; buildSelect(); SFX.item(); }; grid.appendChild(b); });
-  const pc=$("picked"); pc.innerHTML=""; const cv2=document.createElement("canvas"); cv2.width=48; cv2.height=48; cv2.getContext("2d").drawImage(vehicleSprite(pick.racer,pick.veh,0),0,0);
+  const pc=$("picked"); pc.innerHTML=""; const cv2=document.createElement("canvas"); cv2.width=48; cv2.height=48; cv2.getContext("2d").drawImage(vehicleSprite(armoured(pick.racer,arm),pick.veh,0),0,0);
   pc.appendChild(cv2); const d=document.createElement("div"); const pr=pick.racer.st, pip=(n,l)=>`<i class="pip ${n>0?"up":n<0?"dn":""}">${l} ${n>0?"+".repeat(n):n<0?"−".repeat(-n):"·"}</i>`;
   d.innerHTML=`<b>${pick.racer.name}</b><span>“${pick.racer.tag}” on the ${VEH[pick.veh].name}</span><div class="pips">${pip(pr[0],"SPD")}${pip(pr[1],"ACC")}${pip(pr[2],"HND")}${pip(pr[3],"WGT")}</div>${pick.racer.power?`<span class="power">★ ${pick.racer.power}</span>`:""}<span class="wtip">Heavy = higher top speed, wins bumps &amp; slides wide in drifts, but slow to start &amp; turn. Light = quick start &amp; sharp turns, but gets shoved around.</span>`; pc.appendChild(d);
   const vo=$("vehOpts"); vo.innerHTML="";
-  for(const v in VEH){ const b=document.createElement("button"); b.className="opt"+(v===pick.veh?" on":""); const c=document.createElement("canvas"); c.width=48; c.height=48; c.getContext("2d").drawImage(vehicleSprite(pick.racer,v,0),0,0);
+  for(const v in VEH){ if(v==="horse" && !REWARD.cup) continue; const b=document.createElement("button"); b.className="opt"+(v===pick.veh?" on":""); const c=document.createElement("canvas"); c.width=48; c.height=48; c.getContext("2d").drawImage(vehicleSprite(armoured(pick.racer,arm),v,0),0,0);
     b.appendChild(c); b.insertAdjacentHTML("beforeend",`<b>${VEH[v].name}</b><span>${VEH[v].desc}</span>`); b.onclick=()=>{ pick.veh=v; buildSelect(); }; vo.appendChild(b); }
+  if(REWARD.gold){ const ab=document.createElement("button"); ab.className="opt"+(pick.armour?" on":""); const c=document.createElement("canvas"); c.width=48; c.height=48;
+    c.getContext("2d").drawImage(portrait({...pick.racer,look:{...pick.racer.look,armour:true}}),0,0,48,48);
+    ab.appendChild(c); ab.insertAdjacentHTML("beforeend",`<b>⚜ Gold Armour</b><span>${pick.armour?"ON — tap to remove":"Earned! Tap to wear"}</span>`);
+    ab.onclick=()=>{ pick.armour=!pick.armour; SFX.item&&SFX.item(); buildSelect(); }; vo.appendChild(ab); }
   const S=effStats(pick.racer,pick.veh); const bar=(v)=>`<div class="bar"><i style="width:${Math.round(clamp(v,0,1)*100)}%"></i></div>`;
   $("vehStats").innerHTML=`<span>Speed</span>${bar((S.max-2.85)/0.7)}<span>Acceleration</span>${bar((S.acc-.035)/.06)}<span>Handling</span>${bar((S.turn-.034)/.024)}<span>Off-road/Wet</span>${bar(S.off/.8)}<span>Weight</span>${bar(S.heavy/2.6)}`;
   const dopts=$("diffOpts"); dopts.innerHTML="";
