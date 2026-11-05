@@ -1587,8 +1587,9 @@ function i4Scenery(){ const D=COURSE;
   { const a=at(w0-0.006,TW/3); SCENERY.push({img:SPR_IMG.x_arrowBoard,x:a.x,y:a.y,w:12,h:14}); COLLIDERS.push({x:a.x,y:a.y,r:5}); OBST.push({x:a.x,y:a.y}); }
   // Jingle Junction: arch over the road + attractions around the plaza
   { const f=fAt([1300,780]), s=at(f,0); SCENERY.push({img:SPR_IMG.x_gatePark,x:s.x,y:s.y,w:TW+30,h:(TW+30)*.45}); COLLIDERS.push({x:s.x+s.p.nx*(TW/2+15),y:s.y+s.p.ny*(TW/2+15),r:7},{x:s.x-s.p.nx*(TW/2+15),y:s.y-s.p.ny*(TW/2+15),r:7}); }
-  for(const [pt,img,sd,w,h,r] of [[[1150,720],SPR_IMG.x_ferris,-1,60,62,26],[[1060,600],SPR_IMG.x_bigtree,1,52,90,14],[[1100,480],SPR_IMG.x_coaster,-1,96,52,34],[[1250,400],SPR_IMG.x_house,1,46,44,22],
-      [[1380,900],SPR_IMG.x_globe,1,30,34,14],[[1330,330],SPR_IMG.x_house,-1,46,44,22],[[1200,740],SPR_IMG.x_snowman,1,12,18,5],[[1080,540],SPR_IMG.x_orn,-1,14,16,6]]) besideOne(img,fAt(pt),sd,w,h,r);
+  const outside=f=>{ const i=Math.floor(f*N); let cx=0,cy=0; for(let k=-20;k<=20;k++){ const q=TR[(i+k+N)%N]; cx+=q.x; cy+=q.y; } cx/=41; cy/=41; const p=TR[i]; return ((p.x+p.nx*80-cx)**2+(p.y+p.ny*80-cy)**2)>((p.x-p.nx*80-cx)**2+(p.y-p.ny*80-cy)**2)?1:-1; };
+  for(const [pt,img,sd0,w,h,r] of [[[1150,720],SPR_IMG.x_ferris,-1,60,62,26],[[1060,600],SPR_IMG.x_bigtree,1,52,90,14],[[1100,480],SPR_IMG.x_coaster,-1,96,52,34],[[1250,400],SPR_IMG.x_house,1,46,44,22],
+      [[1380,900],SPR_IMG.x_globe,1,30,34,14],[[1330,330],SPR_IMG.x_house,-1,46,44,22],[[1200,740],SPR_IMG.x_snowman,1,12,18,5],[[1080,540],SPR_IMG.x_orn,-1,14,16,6]]){ const f=fAt(pt), sd=outside(f), a=placeBeside(f,sd,TW/2+r+34,r); if(!a) continue; if(nearestDist(a.x,a.y)<TW/2+r+30) continue; SCENERY.push({img,x:a.x,y:a.y,w,h}); COLLIDERS.push({x:a.x,y:a.y,r}); }
   for(const pt of [[1220,700],[1060,650],[1150,430]]){ const a=at(fAt(pt),0); SCENERY.push({img:SPR_IMG.x_arch,x:a.x,y:a.y,w:TW+24,h:(TW+24)*.85}); COLLIDERS.push({x:a.x+a.p.nx*(TW/2+10),y:a.y+a.p.ny*(TW/2+10),r:5},{x:a.x-a.p.nx*(TW/2+10),y:a.y-a.p.ny*(TW/2+10),r:5}); }
   scatter(150,30,300,TREE); }
 function bethScenery(){
@@ -1610,28 +1611,28 @@ const NP_CP=[[420,1330],[760,1345],[1080,1330],[1320,1250],[1400,1060],[1330,880
 const I4_CP=[[420,1325],[760,1335],[1100,1322],[1300,1260],[1400,1100],[1380,900],[1300,780],[1150,720],[1050,620],[1100,480],[1250,400],[1380,300],[1360,160],[1200,110],[900,120],[600,130],[350,160],[200,260],[150,450],[180,650],[160,850],[150,1050],[170,1200],[250,1300]];
 const XL=[-32,0,32];
 const X_COURSES=[
- { id:"x_campus", name:"Candy Cane Campus", sub:"Snow • Ice • Candy Cane Curbs", theme:"snow", CP:CAMPUS_CP, stars:1, label:"🎄 NEW", tw:68, aiBoost:.01, snow:true,
+ { id:"x_campus", laps:5, name:"Candy Cane Campus", sub:"5 laps • Snow • Ice • Candy Cane Curbs", theme:"snow", CP:CAMPUS_CP, stars:1, label:"🎄 NEW", tw:68, aiBoost:.01, snow:true,
    desc:"Lancer Way after a (very rare) Tampa snowfall. Candy cane curbs, snowmen, and icy patches that make your kart slide — the duck pond froze into an ice rink!",
    water:[], rink:[690,1150,90,62], ice:[[0.12,-10,26,12],[0.3,12,24,11],[0.47,-6,30,13],[0.64,10,22,10],[0.8,-12,26,12],[0.93,8,24,11]],
    pads:[[0.07,-14],[0.44,12],[0.62,-12],[0.9,10]], boxRows:[0.19,0.5,0.8], paint:paintSnowCampus, scenery:snowScenery, prep:prepIce,
    sky:["#9fb8d8","#eef4fb"], fog:"236,242,250", out:[236,242,248], splash:"" },
- { id:"x_tampa", name:"Tampa Christmas Lights", sub:"Night Race • Boat Parade • Skyway", theme:"citynight", CP:CITY_CP, stars:2, label:"🎄 NEW", tw:60, aiBoost:.03,
+ { id:"x_tampa", laps:5, name:"Tampa Christmas Lights", sub:"5 laps • Night Race • Boat Parade", theme:"citynight", CP:CITY_CP, stars:2, label:"🎄 NEW", tw:60, aiBoost:.03,
    desc:"Downtown Tampa at night. Palm trees wrapped in lights, a lit-up boat parade on the river, and the Skyway glowing at the finish. Watch out for holiday traffic!",
    water:COURSES[1].water, rails:true, crosswalks:[0.15,0.47,0.7], pads:[[0.1,0],[0.36,-12],[0.6,12],[0.84,0]], boxRows:[0.25,0.53,0.77], traffic:COURSES[1].traffic,
    paint:paintCityNight, scenery:cityNightScenery, sky:["#05081e","#2a3270"], skyMid:"#121848", fog:"36,44,96", out:[30,32,44], tint:"rgba(20,30,90,.14)", splash:"SPLASH! Into the bay!" },
- { id:"x_northpole", name:"North Pole Express", sub:"Train Crossings • Jump the Train!", theme:"northpole", CP:NP_CP, stars:2, label:"🎄 NEW", tw:64, aiBoost:.04, snow:true, rail:{x:600},
+ { id:"x_northpole", laps:5, name:"North Pole Express", sub:"5 laps • Jump the Train!", theme:"northpole", CP:NP_CP, stars:2, label:"🎄 NEW", tw:64, aiBoost:.04, snow:true, rail:{x:600},
    desc:"Race past the Elf Workshop under the northern lights. The North Pole Express crosses the road twice — hit the yellow ramps to jump right over the train!",
    water:[], pads:[[0.2,0],[0.5,-12],[0.78,12]], boxRows:[0.16,0.42,0.7], paint:paintNorthPole, scenery:northPoleScenery,
    prep:(d)=>{ d._cross=railCross(); }, xTraffic:addTrains, xSurf:(g)=>{ for(const i of COURSE._cross){ g.fillStyle="#ff00ff"; rampRect(g,(i-6+N)%N,"#ff00ff"); } },
    sky:["#050b24","#3a5a90"], skyMid:"#13285a", fog:"190,205,228", out:[232,238,246], splash:"" },
- { id:"x_i4", name:"I-4 Dash to Orlando", sub:"3 Lanes • Traffic • Wrong-Way Drivers", theme:"i4", CP:I4_CP, stars:3, label:"🎄 NEW", tw:96, aiBoost:.05, lanes:XL,
+ { id:"x_i4", laps:5, name:"I-4 Dash to Orlando", sub:"5 laps • 3 Lanes • Wrong-Way Drivers", theme:"i4", CP:I4_CP, stars:3, label:"🎄 NEW", tw:96, aiBoost:.05, lanes:XL,
    desc:"Three lanes of I-4 past Plant City strawberries and orange groves, through the Jingle Junction holiday park and back. Pass the slow traffic — and watch for WRONG-WAY DRIVERS!",
    water:[], pads:[[0.08,0],[0.3,-32],[0.55,32],[0.8,0]], boxRows:[0.14,0.4,0.66,0.88],
    traffic:[{f:.05,lat:-32,sp:1.5,img:"car0"},{f:.12,lat:0,sp:1.7,img:"car1"},{f:.2,lat:32,sp:1.3,img:"x_semi",big:true},{f:.29,lat:-32,sp:1.6,img:"car2"},{f:.37,lat:32,sp:1.8,img:"car3"},
      {f:.46,lat:0,sp:1.4,img:"x_semi",big:true},{f:.55,lat:-32,sp:1.75,img:"car4"},{f:.63,lat:32,sp:1.55,img:"car0"},{f:.72,lat:0,sp:1.65,img:"car1"},{f:.81,lat:-32,sp:1.35,img:"x_semi",big:true},{f:.9,lat:32,sp:1.7,img:"car2"},
      {f:.34,lat:0,sp:-1.5,img:"x_carF0",imgB:"x_carF0b"},{f:.67,lat:-32,sp:-1.4,img:"x_carF1",imgB:"x_carF1b"},{f:.93,lat:32,sp:-1.6,img:"x_carF2",imgB:"x_carF2b"}],
    paint:paintI4, scenery:i4Scenery, sky:["#4a9be8","#d6ecff"], fog:"215,232,250", out:[95,154,64], splash:"" },
- { id:"x_beth", name:"Bethlehem Road", sub:"Follow the Star", theme:"bethlehem", CP:LAGOON_CP, stars:2, label:"✨ SPECIAL", nocup:true, tw:60, aiBoost:.02,
+ { id:"x_beth", laps:5, name:"Bethlehem Road", sub:"5 laps • Follow the Star", theme:"bethlehem", CP:LAGOON_CP, stars:2, label:"✨ SPECIAL", nocup:true, tw:60, aiBoost:.02,
    desc:"A starlit dirt road past the shepherds' fields and the little town, following the star to the stable. No items on this one — a quieter race to remember what Christmas is about.",
    verse:"“Glory to God in the highest, and on earth peace, good will toward men.” — Luke 2:14 (KJV)",
    water:[], pads:[[0.3,0],[0.7,0]], boxRows:[], paint:paintBethlehem, scenery:bethScenery,
