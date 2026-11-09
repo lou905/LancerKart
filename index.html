@@ -335,16 +335,20 @@ const VEH={
  horse:{name:"Royal Steed",desc:"Earned by winning the Cup",max:3.27,acc:.075,turn:.05,off:.62,heavy:.7,reward:true}
 };
 /* ---- earned unlocks (persist on this computer) ---- */
-const REWARD={ get cup(){ return lsGet("lancerkart_cupWon",0)?true:false; }, get gold(){ return lsGet("lancerkart_gold",0)?true:false; } };
+const REWARD={ get cup(){ return lsGet("lancerkart_cupWon",0)?true:false; }, get gold(){ return lsGet("lancerkart_gold",0)?true:false; }, get santa(){ return lsGet("lancerkart_santa",0)?true:false; } };
 function unlockSteed(){ if(!REWARD.cup) lsSet("lancerkart_cupWon",1); }
 function unlockGold(){ if(!REWARD.gold) lsSet("lancerkart_gold",1); }
-const _OK=JSON.parse(atob("fX1dNy4xLDI3LjAsNDQwLjAsNjAuMCw5Mi4zWzoidHJhYyIsXTcuMCwyNi4wLDUwLjAsNTcwLjAsNzIuM1s6ImVraWIiLF0xLDc0LjAsMzQwLjAsNTUwLjAsNTMuM1s6InRyYWsiezoidiIsfV0xLDAuMS0sMC4xLDAuMSwwLjFbOiJzb2xyYWMiLF0xLDAuMCwwLjIsMC4xLDAuMS1bOiJzc3JtIixdMSwwLjEsMC4wLDAuMCwwLjFbOiJjcm0iLF0xLDAuMSwwLjAsMC4xLDAuMFs6InBiIixdMSwwLjIsMC4xLSwwLjEtLDAuMls6ImZlaGMiLF0xLDAuMiwwLjEsMC4xLSwwLjBbOiJ5ZGRlIixdMSwwLjEtLDAuMSwwLjEsMC4xWzoidHJtIixdMSwwLjIsMC4xLSwwLjAsMC4xWzoid2hjYW9jIixdMSwwLjAsMC4xLDAuMSwwLjBbOiJtc20iLF01MTAuMSwwLjEsMC4wLDAuMS0sMC4yWzoia3JtIixdMSwwLjEtLDAuMCwwLjIsMC4xWzoiYXNvcyIsXTEsMC4wLDAuMCwwLjEsMC4xWzoiYXNzaWxlbSIsXTEsMC4xLSwwLjIsMC4xLDAuMFs6ImhjaXIiLF0xLDAuMSwwLjIsMC4wLDAuMS1bOiJlaWhjdGlyIixdMSwwLjEtLDAuMSwwLjIsMC4wWzoiZ3JtIixdMSwwLjAsMC4xLDAuMCwwLjFbOiJ0cmQiezoiciJ7").split("").reverse().join(""));
+function unlockSanta(){ if(!REWARD.santa) lsSet("lancerkart_santa",1); }   // Christmas Cup: Santa Suit + secret racer Blitzen
+const _OK=JSON.parse(atob("fX1dNy4xLDI3LjAsNDQwLjAsNjAuMCw5Mi4zWzoidHJhYyIsXTcuMCwyNi4wLDUwLjAsNTcwLjAsNzIuM1s6ImVraWIiLF0xLDc0LjAsMzQwLjAsNTUwLjAsNTMuM1s6InRyYWsiezoidiIsfV0xLDAuMS0sMC4xLDAuMSwwLjFbOiJuZXp0aWxiIixdMSwwLjEtLDAuMSwwLjEsMC4xWzoic29scmFjIixdMSwwLjAsMC4yLDAuMSwwLjEtWzoic3NybSIsXTEsMC4xLDAuMCwwLjAsMC4xWzoiY3JtIixdMSwwLjEsMC4wLDAuMSwwLjBbOiJwYiIsXTEsMC4yLDAuMS0sMC4xLSwwLjJbOiJmZWhjIixdMSwwLjIsMC4xLDAuMS0sMC4wWzoieWRkZSIsXTEsMC4xLSwwLjEsMC4xLDAuMVs6InRybSIsXTEsMC4yLDAuMS0sMC4wLDAuMVs6IndoY2FvYyIsXTEsMC4wLDAuMSwwLjEsMC4wWzoibXNtIixdNTEwLjEsMC4xLDAuMCwwLjEtLDAuMls6ImtybSIsXTEsMC4xLSwwLjAsMC4yLDAuMVs6ImFzb3MiLF0xLDAuMCwwLjAsMC4xLDAuMVs6ImFzc2lsZW0iLF0xLDAuMS0sMC4yLDAuMSwwLjBbOiJoY2lyIixdMSwwLjEsMC4yLDAuMCwwLjEtWzoiZWloY3RpciIsXTEsMC4xLSwwLjEsMC4yLDAuMFs6ImdybSIsXTEsMC4wLDAuMSwwLjAsMC4xWzoidHJkIns6InIiew==").split("").reverse().join(""));
 function _offS(rid,veh){ const V=_OK.v[veh==="horse"?"bike":veh], s=_OK.r[rid]; if(!V||!s) return null; const heavy=V[4]*(1+s[3]*.35);
   return {max:V[0]*(1+s[0]*.009+s[2]*.004-s[3]*.004)*s[4], acc:V[1]*(1+s[1]*.1-s[3]*.07), turn:V[2]*(1+s[2]*.06-s[3]*.04), off:V[3]*(1-s[3]*.02), heavy}; }
 function effStats(r,veh){ const V=VEH[veh], s=r.st||[0,0,0,0];
   const heavy=V.heavy*(1+s[3]*.35);
   // wf: weight feel, about -1 (light) to +1.5 (heaviest). Heavy = faster top end, slides wider, wins bumps; light = quick start, sharp turns, grips.
   return {max:V.max*(1+s[0]*.009+s[2]*.004-s[3]*.004)*(r.zip||1), acc:V.acc*(1+s[1]*.1-s[3]*.07), turn:V.turn*(1+s[2]*.06-s[3]*.04), off:V.off*(1-s[3]*.02), heavy, wf:clamp(Math.log2(heavy),-1,1.5)}; }
+const BLITZEN={id:"blitzen",secret:true,power:"SECRET RACER — one of Santa's reindeer from the 1823 poem “A Visit from St. Nicholas.” Earned by winning the Christmas Cup",st:[1, 1, 1, -1],tag:"Flying Start",name:"Blitzen",kc:"#8a5a34",look:{reindeer:true,skin:"#9a6a40",hair:"#6e4a2a",shirt:"#8a5a34",pants:"#6e4a2a"}};
+Object.freeze(BLITZEN.st); Object.freeze(BLITZEN);
+const findRacer=id=>ROSTER.find(r=>r.id===id)||(id==="blitzen"?BLITZEN:null);
 ROSTER.forEach(r=>{ Object.freeze(r.st); }); Object.freeze(ROSTER); for(const v in VEH) Object.freeze(VEH[v]); Object.freeze(VEH);
 const DIFF={easy:{name:"Easy",desc:"Learner's permit",f:.88},normal:{name:"Normal",desc:"Varsity",f:.95},hard:{name:"Hard",desc:"Senior year",f:1.0}};
 
@@ -394,6 +398,12 @@ function portrait(r,size=32){
     if(L.santa){ R(9,1,13,6,"#c0182e"); R(20,0,5,4,"#c0182e"); R(24,0,3,3,"#ffffff"); R(7,6,18,3,"#ffffff"); }
     if(L.sweater){ R(5,27,22,1,"#ffffff"); for(let x=6;x<27;x+=4) R(x,29,2,2,"#ffffff"); }
     if(L.ornament){ R(10,5,12,11,"#d0202a"); R(12,6,3,3,"#ffb0b0"); R(14,2,4,3,"#f2c230"); R(15,0,2,2,"#f2c230"); }
+    if(L.reindeer){ const an="#c9a46a"; R(10,6,12,15,L.skin); R(11,15,10,6,"#c8a07a"); R(14,15,4,3,"#2a1a12"); R(12,12,2,2,"#1a1a1a"); R(18,12,2,2,"#1a1a1a");
+      R(6,8,4,3,L.skin); R(22,8,4,3,L.skin);
+      R(10,1,2,6,an); R(7,2,4,2,an); R(7,0,2,3,an); R(20,1,2,6,an); R(21,2,4,2,an); R(23,0,2,3,an);
+      R(5,24,22,8,L.shirt); R(12,24,8,3,"#e8dcc8"); }
+    if(L.santaSuit){ R(5,24,22,8,"#c0182e"); R(5,24,22,1,"#ffffff"); R(15,24,2,8,"#ffffff"); R(5,29,22,2,"#1a1a1a"); R(14,29,4,2,"#f2c230");
+      if(!L.reindeer){ R(10,16,12,6,"#f4f4f4"); R(12,22,8,2,"#f4f4f4"); R(13,17,6,1,"#c98a7a"); R(9,1,13,6,"#c0182e"); R(20,0,5,4,"#c0182e"); R(24,0,3,3,"#ffffff"); R(7,6,18,3,"#ffffff"); } }
     if(L.armour){ const gd="#f2c230", gl="#fff3b0", gk="#c9971f";
       R(5,24,22,8,gd); R(5,24,22,1,gl); R(5,30,22,1,gk); R(15,24,2,8,gk);   // breastplate + ridge
       R(4,24,5,6,gd); R(23,24,5,6,gd); R(4,24,5,1,gl); R(23,24,5,1,gl);     // pauldrons
@@ -436,6 +446,11 @@ function driverBack(R,L,ox,oy){
   if(L.sweater){ R(ox+13,oy+16,22,2,"#ffffff"); for(let x=ox+14;x<ox+35;x+=4) R(x,oy+19,2,2,"#ffffff"); }
   if(L.santa){ R(hx-2,hy+2,16,3,"#ffffff"); R(hx,hy-5,12,7,"#c0182e"); R(hx+9,hy-7,5,4,"#c0182e"); R(hx+13,hy-8,3,3,"#ffffff"); }
   if(L.ornament){ R(hx-1,hy-1,14,12,"#d0202a"); R(hx+2,hy+1,3,3,"#ffb0b0"); R(hx+4,hy-4,4,3,"#f2c230"); R(hx+5,hy-6,2,2,"#f2c230"); }
+  if(L.reindeer){ const an="#c9a46a"; R(hx,hy,12,11,L.skin); R(hx-3,hy+2,3,3,L.skin); R(hx+12,hy+2,3,3,L.skin);
+    R(hx+1,hy-6,2,6,an); R(hx-2,hy-5,4,2,an); R(hx+9,hy-6,2,6,an); R(hx+10,hy-5,4,2,an); R(hx+4,hy+2,4,3,"#c8a07a"); }
+  if(L.santaSuit){ R(ox+13,oy+12,22,12,"#c0182e"); R(ox+13,oy+12,22,1,"#ffffff"); R(ox+13,oy+19,22,2,"#1a1a1a"); R(ox+23,oy+19,2,2,"#f2c230");
+    R(ox+10,oy+15,4,8,"#a8141f"); R(ox+34,oy+15,4,8,"#a8141f"); R(ox+10,oy+21,4,2,"#ffffff"); R(ox+34,oy+21,4,2,"#ffffff");
+    if(!L.reindeer){ R(hx-1,hy+7,14,5,"#f4f4f4"); R(hx-2,hy+2,16,3,"#ffffff"); R(hx,hy-5,12,7,"#c0182e"); R(hx+9,hy-7,5,4,"#c0182e"); R(hx+13,hy-8,3,3,"#ffffff"); } }
   if(L.armour){ const gd="#f2c230", gl="#fff3b0", gk="#c9971f";
     R(ox+13,oy+12,22,12,gd); R(ox+13,oy+12,22,1,gl); R(ox+13,oy+21,22,1,gk); R(ox+23,oy+13,2,10,gk); // breastplate + ridge
     R(ox+10,oy+13,5,5,gd); R(ox+33,oy+13,5,5,gd); R(ox+10,oy+13,5,1,gl); R(ox+33,oy+13,5,1,gl);       // pauldrons
@@ -509,6 +524,22 @@ function boatSprite(r,lean){
   });
   if(!lean) return base;
   return mk(48,48,(g)=>{ g.translate(24,46); g.rotate(lean*.1); g.translate(lean*2,0); g.drawImage(base,-24,-46); });
+}
+/* jeep seen from behind: roll bar, spare tire, knobby snow tires (Christmas at Grandma's) */
+function jeepSprite(r,lean){
+  const L=HOLIDAY?xmasLook(r):r.look, kc=r.kc;
+  const base=mk(48,48,(g,R)=>{
+    R(6,8,3,24,"#3a3a3a"); R(39,8,3,24,"#3a3a3a"); R(6,8,36,3,"#3a3a3a");          // roll bar
+    driverBack(R,L,0,9);
+    R(4,28,40,13,kc); R(4,28,40,2,shade(kc,1.25)); R(4,37,40,4,shade(kc,.75));       // tub
+    R(4,27,40,2,"#f4f8ff");                                                          // snow on the rim
+    g.fillStyle="#1a1a1a"; ell(g,24,33,7,7); g.fillStyle="#555"; ell(g,24,33,3,3);  // spare tire
+    R(5,30,4,3,"#ff3b3b"); R(39,30,4,3,"#ff3b3b");
+    R(0,31,9,16,"#161616"); R(39,31,9,16,"#161616"); for(let i=0;i<5;i++){ R(0,33+i*3,9,1,"#333"); R(39,33+i*3,9,1,"#333"); }
+    R(2,38,5,3,"#777"); R(41,38,5,3,"#777"); R(8,41,32,3,"#2a2a2a"); R(19,41,10,3,"#f2f2f2");
+  });
+  if(!lean) return base;
+  return mk(48,48,(g)=>{ g.translate(24,46); g.rotate(lean*.06); g.translate(lean*2,0); g.drawImage(base,-24,-46); });
 }
 /* little pennant flag for Flag Battle */
 function flagIcon(g,x,y,col,blink){ if(blink) return; g.fillStyle="#dfe6f5"; g.fillRect(x,y-12,2,14); g.fillStyle=col; g.beginPath(); g.moveTo(x+2,y-12); g.lineTo(x+11,y-8); g.lineTo(x+2,y-4); g.closePath(); g.fill(); g.strokeStyle="rgba(255,255,255,.9)"; g.lineWidth=1; g.stroke(); }
@@ -786,7 +817,7 @@ function paintCarloop(g){
   startLine(g); padShapes(g,true);
 }
 let DARTERS=[], ANIM=[];
-function resetDarters(){ DARTERS=(COURSE.darters||[]).map(([f,side,sp,ph],i)=>({f,side,sp,ph,img:SPR_IMG["car"+(i%5)],x:0,y:0,out:0,was:0})); moveDarters(0); }
+function resetDarters(){ const DI=COURSE.darterImg; DARTERS=(COURSE.darters||[]).map(([f,side,sp,ph],i)=>{ const di=DI?DI[i%DI.length]:null; return {f,side,sp,ph,img:SPR_IMG[di?di[0]:"car"+(i%5)],w:di?di[1]:13,h:di?di[2]:9,msg:di?di[3]:null,x:0,y:0,out:0,was:0}; }); moveDarters(0); }
 function moveDarters(dt=1){ for(const d of DARTERS){ d.ph+=d.sp*dt; const s=clamp(Math.sin(d.ph)*1.9-0.55,0,1); d.out=s; const a=at(d.f,d.side*(TW/2+20-38*s)); d.x=a.x; d.y=a.y;
   if(s>0 && d.was===0 && player && Math.hypot(d.x-player.x,d.y-player.y)<170 && state==="race") SFX.honk(); d.was=s; } }
 function resetAnim(){ ANIM=[]; if(COURSE.theme!=="carloop") return;
@@ -1355,7 +1386,7 @@ function makeSky(theme){ return mk(SKYW,HOR,(g,R)=>{ srand(theme.length*977); if
    ===================================================================== */
 var HOLIDAY=false;
 function star5(g,cx,cy,r){ g.beginPath(); for(let i=0;i<10;i++){ const a=-Math.PI/2+i*Math.PI/5, rr=i%2?r*.45:r; g.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr); } g.closePath(); g.fill(); }
-function xmasLook(r){ const L={...r.look}; if(L.armour) return L;
+function xmasLook(r){ const L={...r.look}; if(L.armour||L.reindeer||L.santaSuit) return L;
   if(L.shineHead){ L.ornament=true; return L; }            // Mr. Richie's shiny head becomes a glowing ornament
   L.santa=true; L.hat=null; L.cap=null; L.chef=null; L.cop=false;
   const i=ROSTER.findIndex(x=>x.id===r.id); L.sweater=["#b3262e","#2f7d32","#1d4e89"][(i<0?0:i)%3];
@@ -1465,6 +1496,7 @@ ICONS.cocoa=XITEM.icons.cocoa; ITEM_NAMES.cocoa=XITEM.names.cocoa;
 
 /* ---------- ice (Candy Cane Campus) ---------- */
 function onIce(x,y){ for(const e of COURSE._ice){ const dx=x-e.x, dy=y-e.y, c=Math.cos(e.ang), s=Math.sin(e.ang); const u=(dx*c+dy*s)/e.rx, v=(-dx*s+dy*c)/e.ry; if(u*u+v*v<1) return true; } return false; }
+function inDrift(x,y){ for(const e of COURSE._drifts){ const dx=x-e.x, dy=y-e.y, c=Math.cos(e.ang), s=Math.sin(e.ang); const u=(dx*c+dy*s)/e.rx, v=(-dx*s+dy*c)/e.ry; if(u*u+v*v<1) return true; } return false; }
 function prepIce(def){ def._ice=(def.ice||[]).map(([f,l,rx,ry])=>{ const a=at(f,l); return {x:a.x,y:a.y,rx,ry,ang:a.p.ang}; }); if(def.rink){ const [x,y,rx,ry]=def.rink; def._ice.push({x,y,rx,ry,ang:0}); } }
 
 /* ---------- ground painters ---------- */
@@ -1609,6 +1641,96 @@ function addTrains(){ TRAIN.s=Math.random()*400; for(let j=0;j<TRAIN.cars;j++){ 
 /* ---------- course list ---------- */
 const NP_CP=[[420,1330],[760,1345],[1080,1330],[1320,1250],[1400,1060],[1330,880],[1150,840],[960,900],[790,840],[740,640],[860,470],[1100,440],[1320,380],[1400,230],[1250,130],[950,140],[650,170],[420,250],[260,380],[220,560],[300,720],[220,880],[170,1060],[230,1230]];
 const I4_CP=[[420,1325],[760,1335],[1100,1322],[1300,1260],[1400,1100],[1380,900],[1300,780],[1150,720],[1050,620],[1100,480],[1250,400],[1380,300],[1360,160],[1200,110],[900,120],[600,130],[350,160],[200,260],[150,450],[180,650],[160,850],[150,1050],[170,1200],[250,1300]];
+/* ---------- Candy Cane Lane: the long, twisty Season 2 course ---------- */
+const CC_CP=[[260,1390],[520,1405],[760,1370],[1000,1405],[1220,1385],[1400,1320],[1445,1200],[1360,1110],[1150,1135],[960,1100],[760,1140],[600,1110],
+ [500,1030],[510,920],[620,880],[820,920],[1020,880],[1220,910],[1360,860],[1400,740],[1310,660],[1100,690],[900,640],[700,680],[560,630],[500,520],[580,420],
+ [780,440],[980,400],[1180,430],[1340,380],[1420,260],[1330,140],[1120,110],[930,170],[740,110],[550,170],[360,120],[210,200],[170,360],[280,500],[190,650],
+ [290,800],[190,960],[270,1110],[200,1260]];
+const CC_HAIRPINS=[[0.166,1],[0.287,-1],[0.421,1],[0.545,-1],[0.67,1],[0.873,-1],[0.994,1]];   // [where on the lap, outside of the turn]
+const bigCane=mk(30,96,(g)=>{ const path=()=>{ g.beginPath(); g.moveTo(10,94); g.lineTo(10,22); g.arc(19,22,9,Math.PI,0); g.lineTo(28,32); };
+  g.lineCap="round"; g.lineWidth=9; g.strokeStyle="#ffffff"; path(); g.stroke(); g.strokeStyle="#d0202a"; g.setLineDash([7,7]); path(); g.stroke(); g.setLineDash([]);
+  g.lineWidth=2; g.strokeStyle="rgba(255,255,255,.55)"; g.beginPath(); g.moveTo(8,90); g.lineTo(8,24); g.stroke();
+  g.fillStyle="#2f7d32"; g.beginPath(); g.moveTo(10,40); g.lineTo(1,34); g.lineTo(1,46); g.fill(); g.beginPath(); g.moveTo(10,40); g.lineTo(19,34); g.lineTo(19,46); g.fill(); g.fillStyle="#1f5f24"; ell(g,10,40,3,3); });
+const gumdrop=c=>mk(18,16,(g,R)=>{ g.fillStyle=shade(c,.75); g.beginPath(); g.moveTo(1,15); g.quadraticCurveTo(1,1,9,1); g.quadraticCurveTo(17,1,17,15); g.fill();
+  g.fillStyle=c; g.beginPath(); g.moveTo(2,14); g.quadraticCurveTo(2,2,9,2); g.quadraticCurveTo(15,2,15,14); g.fill(); g.fillStyle="rgba(255,255,255,.55)"; ell(g,6,6,2,3);
+  for(const [x,y] of [[10,5],[12,9],[5,11],[9,12],[13,13]]) R(x,y,1,1,"#ffffff"); });
+const lollipop=(c1,c2)=>mk(18,42,(g,R)=>{ R(8,16,2,26,"#f4f0e6"); g.fillStyle=c1; ell(g,9,9,8,8); g.strokeStyle=c2; g.lineWidth=2; g.beginPath(); for(let a=0;a<12;a+=.2){ const r=a*.6; g.lineTo(9+Math.cos(a)*r,9+Math.sin(a)*r); } g.stroke(); });
+Object.assign(SPR_IMG,{ x_bigcane:bigCane, x_gateCandy:gateX("CANDY CANE LANE","#c0182e",13),
+  x_gum0:gumdrop("#e8402e"), x_gum1:gumdrop("#2f9d3a"), x_gum2:gumdrop("#ffcc2a"), x_gum3:gumdrop("#9a4ad6"), x_lolli0:lollipop("#ff7ad9","#ffffff"), x_lolli1:lollipop("#4ad1ff","#ffffff") });
+function paintCandyLane(g){ const D=COURSE;
+  snowGround(g,"#eef3f8","#e5ecf4");
+  // giant peppermint swirls pressed into the snow
+  srand(77); for(let k=0;k<90;k++){ const x=60+sr()*(MAP-120), y=60+sr()*(MAP-120), r=14+sr()*22; if(nearestDist(x,y)<TW/2+30+r) continue;
+    g.fillStyle="#ffffff"; ell(g,x,y,r,r); g.fillStyle="#d0202a"; for(let w=0;w<8;w+=2){ g.beginPath(); g.moveTo(x,y); g.arc(x,y,r-2,w*Math.PI/4,(w+1)*Math.PI/4); g.closePath(); g.fill(); }
+    g.strokeStyle="rgba(0,0,0,.12)"; g.lineWidth=1; g.beginPath(); g.arc(x,y,r,0,7); g.stroke(); }
+  strokeTrack(g,TW+46,"#dde6ef"); candyCurbs(g); strokeTrack(g,TW-2,"#5b6070");
+  srand(21); g.fillStyle="rgba(255,255,255,.35)"; for(let i=0;i<N;i++){ const p=TR[i]; for(let q=0;q<3;q++){ const l=(sr()-.5)*TW; g.fillRect(p.x+p.nx*l,p.y+p.ny*l,1+sr()*4,1); } }
+  for(const e of D._ice){ g.save(); g.translate(e.x,e.y); g.rotate(e.ang); g.fillStyle="rgba(170,214,240,.75)"; ell(g,0,0,e.rx,e.ry); g.fillStyle="rgba(230,246,255,.8)"; ell(g,-e.rx*.3,-e.ry*.3,e.rx*.35,e.ry*.2); g.restore(); }
+  // red-and-white chevrons on the outside of every hairpin so you can see the turn coming
+  for(const [f,sd] of CC_HAIRPINS) for(let k=-3;k<=3;k++){ const a=at(f+k*0.006,sd*(TW/2+12)); g.save(); g.translate(a.x,a.y); g.rotate(a.p.ang); g.fillStyle=(k+9)%2?"#d0202a":"#ffffff"; g.fillRect(-6,-5,12,10); g.restore(); }
+  g.lineWidth=2; strokeTrack(g,2,"rgba(255,255,255,.5)",[18,26]); startLine(g); padShapes(g,true); }
+const CANDYPICK=()=>{ const r=sr(); if(r<.45) return XTREE(); if(r<.8) return {img:SPR_IMG["x_gum"+(sr()*4|0)],w:16,h:14,r:4,space:12}; return {img:SPR_IMG["x_lolli"+(sr()*2|0)],w:14,h:32,r:3,space:14}; };
+function candyScenery(){
+  addGate(SPR_IMG.x_gateCandy);
+  lineBeside(SPR_IMG.x_candy,0.012,0.995,0.0075,TW/2+8,4,12,0);              // candy canes line the whole course
+  for(const [f,sd] of CC_HAIRPINS) besideOne(SPR_IMG.x_bigcane,f,sd,22,70,6);  // a giant candy cane marks every hairpin
+  addLandmark("x_bigtree",0.23,-1,48,82,14); addLandmark("x_bigtree",0.61,1,48,82,14);
+  for(const f of [0.08,0.35,0.49,0.76,0.92]) besideOne(SPR_IMG.x_snowman,f,f*10%2>1?1:-1,10,15,4);
+  for(const f of [0.04,0.2,0.4,0.58,0.8]) besideOne(SPR_IMG.x_presents,f,f*10%2>1?-1:1,14,9,6);
+  scatter(230,22,260,CANDYPICK); }
+/* ---------- Christmas at Grandma's: jeeps up the mountain ---------- */
+const GM_CP=[[700,1385],[1000,1392],[1250,1335],[1385,1190],[1300,1030],[1405,870],[1295,710],[1395,550],[1300,385],[1170,250],[980,175],[780,225],[600,165],[420,215],
+ [300,300],[310,390],[480,435],[680,450],[790,490],[830,560],[780,625],[620,645],[420,640],[290,670],[250,745],[300,815],[450,840],[660,850],[770,885],[810,960],
+ [760,1030],[600,1050],[400,1045],[270,1085],[230,1170],[300,1290],[470,1370]];
+const bearX=mk(26,20,(g,R)=>{ const b="#4a3020", d="#36231a"; g.fillStyle=b; ell(g,13,12,10,7); R(5,14,4,6,d); R(17,14,4,6,d); g.fillStyle=b; ell(g,21,8,5,5); R(18,2,3,3,b); R(23,2,3,3,b);
+  R(23,9,4,3,"#8a6a50"); R(26,9,1,1,"#111"); R(21,6,1,1,"#111"); g.fillStyle="#f4f8ff"; ell(g,11,6,6,2); });
+const deerX=mk(24,26,(g,R)=>{ const t="#a8743f", d="#7d5530", an="#d9c49a"; R(4,12,13,7,t); R(5,19,2,7,d); R(14,19,2,7,d); R(3,12,3,3,"#ffffff"); R(14,6,4,8,t); R(15,3,6,4,t); R(20,4,2,2,"#2a1a12");
+  R(13,2,2,2,t); R(16,0,1,3,an); R(14,-1,3,1,an); R(18,0,1,3,an); R(18,-1,3,1,an); R(17,4,1,1,"#111"); R(6,13,8,1,"#c99a66"); });
+const peakX=mk(200,120,(g)=>{ g.fillStyle="#7d8ea8"; g.beginPath(); g.moveTo(0,120); g.lineTo(70,20); g.lineTo(100,48); g.lineTo(135,8); g.lineTo(200,120); g.fill();
+  g.fillStyle="#62728c"; g.beginPath(); g.moveTo(135,8); g.lineTo(200,120); g.lineTo(120,120); g.fill();
+  g.fillStyle="#f4f8ff"; g.beginPath(); g.moveTo(135,8); g.lineTo(115,40); g.lineTo(126,36); g.lineTo(136,46); g.lineTo(147,34); g.lineTo(158,40); g.fill();
+  g.beginPath(); g.moveTo(70,20); g.lineTo(55,42); g.lineTo(66,38); g.lineTo(74,46); g.lineTo(86,36); g.fill();
+  for(let x=4;x<196;x+=9){ g.fillStyle="#2f5f3a"; g.beginPath(); g.moveTo(x,106); g.lineTo(x-5,120); g.lineTo(x+5,120); g.fill(); } });
+const rockX=mk(22,14,(g,R)=>{ g.fillStyle="#8d939b"; g.beginPath(); g.moveTo(1,14); g.lineTo(4,5); g.lineTo(11,1); g.lineTo(18,4); g.lineTo(21,14); g.fill(); g.fillStyle="#f4f8ff"; ell(g,10,3,6,2); g.fillStyle="#6f757d"; g.fillRect(12,6,6,8); });
+const moundX=mk(40,12,(g)=>{ g.fillStyle="#c9d6e6"; ell(g,21,8,19,5); g.fillStyle="#ffffff"; ell(g,20,7,18,5); ell(g,12,5,8,4); ell(g,27,5,9,4); });
+const puffX=mk(8,6,(g)=>{ g.fillStyle="rgba(255,255,255,.9)"; ell(g,4,3,4,3); });
+const cabinX=mk(100,84,(g,R)=>{ R(8,38,84,46,"#7a4a26"); for(let y=40;y<84;y+=5){ R(8,y,84,1,"#5e381c"); g.fillStyle="#8e5a30"; ell(g,8,y+2,2,2); ell(g,92,y+2,2,2); }
+  g.fillStyle="#f4f8ff"; g.beginPath(); g.moveTo(0,42); g.lineTo(50,8); g.lineTo(100,42); g.fill(); g.fillStyle="#3a2414"; g.beginPath(); g.moveTo(6,40); g.lineTo(50,12); g.lineTo(94,40); g.fill(); g.fillStyle="#f4f8ff"; g.beginPath(); g.moveTo(4,40); g.lineTo(50,10); g.lineTo(96,40); g.lineTo(90,40); g.lineTo(50,16); g.lineTo(10,40); g.fill();
+  R(70,6,10,20,"#7a7068"); R(68,4,14,4,"#f4f8ff"); g.fillStyle="rgba(230,230,235,.7)"; ell(g,76,0,5,3); ell(g,82,-4,6,3);
+  for(const x of [16,66]){ R(x,50,16,13,"#ffe08a"); R(x+1,51,14,11,"#ffd04a"); R(x+7,50,2,13,"#5e381c"); R(x,56,16,2,"#5e381c"); }
+  R(40,56,20,28,"#5a2e18"); g.strokeStyle="#2f7d32"; g.lineWidth=3; g.beginPath(); g.arc(50,62,5,0,7); g.stroke(); R(48,66,4,3,"#c0182e");
+  R(26,26,48,10,"#14213f"); label(g,"GRANDMA'S",50,31,7,"#ffd84a"); for(let x=10;x<92;x+=6) R(x,38,3,3,BULBS[(x/6|0)%5]); });
+Object.assign(SPR_IMG,{ x_bear:bearX, x_deer:deerX, x_peak:peakX, x_rock:rockX, x_mound:moundX, x_puff:puffX, x_cabin:cabinX,
+  x_gateGma:gateX("GRANDMA'S HOUSE","#2f7d32",13), x_gmaSign:hwySign("GRANDMA'S","Over the river & through the woods","#6e4a2a") });
+XSKY.mountain=(g,R)=>{ for(let i=0;i<14;i++){ const x=sr()*SKYW, y=6+sr()*18, s=8+sr()*14; g.fillStyle="rgba(255,255,255,.85)"; for(let k=0;k<4;k++) ell(g,x+k*s*.7,y+(k%2)*2,s,s*.45); }
+  const range=(col,cap,hmin,hmax,step)=>{ let x=-60; while(x<SKYW+60){ const w=step*(.7+sr()*.8), h=hmin+sr()*(hmax-hmin), t=x+w/2;
+      g.fillStyle=col; g.beginPath(); g.moveTo(x,HOR); g.lineTo(t,HOR-h); g.lineTo(x+w,HOR); g.fill();
+      g.fillStyle=cap; g.beginPath(); g.moveTo(t,HOR-h); g.lineTo(t-w*.13,HOR-h*.74); g.lineTo(t-w*.04,HOR-h*.79); g.lineTo(t+w*.04,HOR-h*.71); g.lineTo(t+w*.13,HOR-h*.75); g.fill(); x+=w*.62; } };
+  range("#9db0cc","#f4f8ff",HOR*.5,HOR*.85,190); range("#71869f","#eef4fb",HOR*.3,HOR*.58,130);
+  g.fillStyle="#eef4fb"; for(let x=0;x<SKYW;x+=4){ const h=5+Math.sin(x*.03)*2; g.fillRect(x,HOR-h,4,h); }
+  for(let x=0;x<SKYW;x+=16){ const tx=x+sr()*10, h=9+sr()*8; g.fillStyle="#2f5f3a"; g.beginPath(); g.moveTo(tx,HOR-h-5); g.lineTo(tx-4,HOR-2); g.lineTo(tx+4,HOR-2); g.fill(); } };
+function prepGrandma(def){ prepIce(def); def._drifts=(def.drifts||[]).map(([f,sd])=>{ const a=at(f,sd*(TW/2+12)); return {x:a.x,y:a.y,rx:34,ry:17,ang:a.p.ang}; }); }
+function paintGrandma(g){ const D=COURSE;
+  snowGround(g,"#eef3f8","#e6edf5");
+  g.strokeStyle="rgba(110,130,165,.16)"; g.lineWidth=2; for(let r=110;r<1150;r+=64){ g.beginPath(); g.ellipse(1080,760,r,r*.8,.35,0,7); g.stroke(); }   // contour lines on the mountainside
+  srand(91); for(let k=0;k<80;k++){ const x=60+sr()*(MAP-120), y=60+sr()*(MAP-120), r=14+sr()*36; if(nearestDist(x,y)<TW/2+36+r) continue;
+    g.fillStyle=sr()<.5?"#8d939b":"#a3a8ae"; g.beginPath(); for(let a=0;a<6;a++){ const rr=r*(.7+sr()*.4); g.lineTo(x+Math.cos(a*1.05)*rr,y+Math.sin(a*1.05)*rr*.7); } g.closePath(); g.fill();
+    g.fillStyle="#f4f8ff"; ell(g,x-r*.15,y-r*.3,r*.45,r*.18); }
+  strokeTrack(g,TW+40,"#d7dee7"); strokeTrack(g,TW+10,"#8a7f74"); strokeTrack(g,TW-2,"#6a6158");
+  srand(22); for(let i=0;i<N;i++){ const p=TR[i]; for(let q=0;q<3;q++){ const l=(sr()-.5)*TW; g.fillStyle=sr()<.5?"rgba(255,255,255,.35)":"rgba(40,30,20,.25)"; g.fillRect(p.x+p.nx*l,p.y+p.ny*l,1+sr()*3,1); } }
+  g.lineWidth=2; strokeTrack(g,2,"rgba(255,255,255,.45)",[14,22]);
+  for(const e of D._ice){ g.save(); g.translate(e.x,e.y); g.rotate(e.ang); g.fillStyle="rgba(170,214,240,.75)"; ell(g,0,0,e.rx,e.ry); g.fillStyle="rgba(230,246,255,.8)"; ell(g,-e.rx*.3,-e.ry*.3,e.rx*.35,e.ry*.2); g.restore(); }
+  for(const e of D._drifts){ g.save(); g.translate(e.x,e.y); g.rotate(e.ang); g.fillStyle="rgba(140,160,195,.35)"; ell(g,2,3,e.rx,e.ry); g.fillStyle="#ffffff"; ell(g,0,0,e.rx,e.ry); g.fillStyle="rgba(205,218,236,.85)"; ell(g,e.rx*.2,e.ry*.3,e.rx*.6,e.ry*.4); g.restore(); }
+  startLine(g); padShapes(g,true); }
+function grandmaScenery(){ const D=COURSE;
+  addGate(SPR_IMG.x_gateGma);
+  addLandmark("x_cabin",0.975,-1,90,76,40); besideOne(SPR_IMG.x_gmaSign,0.94,1,30,18,3);
+  for(const [x,y,w,h] of [[1090,560,190,114],[1080,980,170,102]]) if(nearestDist(x,y)>TW/2+w*.55){ SCENERY.push({img:SPR_IMG.x_peak,x,y,w,h}); COLLIDERS.push({x,y,r:w*.3}); }
+  for(const e of D._drifts) SCENERY.push({img:SPR_IMG.x_mound,x:e.x,y:e.y+4,w:30,h:9});
+  for(const f of [0.08,0.27,0.45,0.6,0.77,0.92]) besideOne(SPR_IMG.x_deer,f,f*10%2>1?1:-1,15,16,4);
+  for(const f of [0.17,0.52,0.71]) besideOne(SPR_IMG.x_bear,f,f*10%2>1?-1:1,17,13,5);
+  for(const f of [0.03,0.4,0.88]) besideOne(SPR_IMG.x_presents,f,-1,14,9,6);
+  scatter(260,20,300,()=>sr()<.8?{img:SPR_IMG.x_pine,w:26,h:38,r:4,space:14}:{img:SPR_IMG.x_rock,w:20,h:13,r:5,space:14}); }
 const XL=[-32,0,32];
 const X_COURSES=[
  { id:"x_campus", laps:5, name:"Candy Cane Campus", sub:"5 laps • Snow • Ice • Candy Cane Curbs", theme:"snow", CP:CAMPUS_CP, stars:1, label:"🎄 NEW", tw:68, aiBoost:.01, snow:true,
@@ -1632,6 +1754,18 @@ const X_COURSES=[
      {f:.46,lat:0,sp:1.4,img:"x_semi",big:true},{f:.55,lat:-32,sp:1.75,img:"car4"},{f:.63,lat:32,sp:1.55,img:"car0"},{f:.72,lat:0,sp:1.65,img:"car1"},{f:.81,lat:-32,sp:1.35,img:"x_semi",big:true},{f:.9,lat:32,sp:1.7,img:"car2"},
      {f:.34,lat:0,sp:-1.5,img:"x_carF0",imgB:"x_carF0b"},{f:.67,lat:-32,sp:-1.4,img:"x_carF1",imgB:"x_carF1b"},{f:.93,lat:32,sp:-1.6,img:"x_carF2",imgB:"x_carF2b"}],
    paint:paintI4, scenery:i4Scenery, sky:["#4a9be8","#d6ecff"], fog:"215,232,250", out:[95,154,64], splash:"" },
+ { id:"x_candy", laps:3, name:"Candy Cane Lane", sub:"3 laps • Longest Track • Twisty Hairpins", theme:"snow", CP:CC_CP, stars:3, label:"🍬 NEW", tw:64, aiBoost:.04, snow:true,
+   desc:"The longest track in Lancerville! Snake back and forth through a candy land of peppermints, gumdrops and giant candy canes — hairpin lefts, hairpin rights, and an icy wiggle down the side. Brake before the big canes!",
+   water:[], ice:[[0.06,-8,26,12],[0.36,10,24,11],[0.6,-10,26,12],[0.82,0,22,10]],
+   pads:[[0.03,0],[0.23,-12],[0.48,12],[0.74,0],[0.93,0]], boxRows:[0.12,0.33,0.52,0.72,0.9], paint:paintCandyLane, scenery:candyScenery, prep:prepIce,
+   sky:["#f7b7c8","#fff1f5"], fog:"250,232,238", out:[236,242,248], splash:"" },
+ { id:"x_grandma", laps:3, name:"Christmas at Grandma's", sub:"3 laps • Jeeps • Mountain • Bears & Deer", theme:"mountain", music:"snow", CP:GM_CP, stars:3, label:"🏔 NEW", tw:62, aiBoost:.04, snow:true, jeeps:true,
+   desc:"Over the river and through the woods! Everybody drives a jeep up the mountain switchbacks to Grandma's cabin. Bears and deer wander onto the road — and go too wide on the cliff turns and you'll get STUCK in the snow drifts!",
+   water:[], ice:[[0.3,0,22,10],[0.655,0,22,10]], drifts:[[0.186,1],[0.38,-1],[0.475,1],[0.58,-1],[0.684,1],[0.8,-1],[0.899,1]],
+   darters:[[0.05,1,.013,0],[0.25,-1,.012,2.1],[0.43,1,.014,4.2],[0.53,-1,.011,1],[0.63,1,.015,3.1],[0.74,-1,.012,5.3],[0.85,1,.013,.4],[0.96,-1,.014,2.6]],
+   darterImg:[["x_bear",18,15,"BEAR ON THE ROAD!"],["x_deer",16,17,"DEER CROSSING!"]],
+   pads:[[0.02,0],[0.33,0],[0.62,0]], boxRows:[0.1,0.3,0.55,0.78], paint:paintGrandma, scenery:grandmaScenery, prep:prepGrandma,
+   sky:["#5a86c4","#dce9f7"], fog:"220,230,242", out:[236,242,248], splash:"" },
  { id:"x_beth", laps:5, name:"Bethlehem Road", sub:"5 laps • Follow the Star", theme:"bethlehem", CP:LAGOON_CP, stars:2, label:"✨ SPECIAL", nocup:true, tw:60, aiBoost:.02,
    desc:"A starlit dirt road past the shepherds' fields and the little town, following the star to the stable. No items on this one — a quieter race to remember what Christmas is about.",
    verse:"“Glory to God in the highest, and on earth peace, good will toward men.” — Luke 2:14 (KJV)",
@@ -1639,7 +1773,7 @@ const X_COURSES=[
    sky:["#03061a","#1e2450"], skyMid:"#0c1238", fog:"34,36,76", out:[190,160,112], tint:"rgba(10,15,60,.16)", splash:"" }
 ];
 const X_DELIVER={...X_COURSES[0], id:"x_deliver", name:"Present Delivery", deliver:true, boxRows:[], pads:[], _tr:null};
-const XTHUMB={snow:["#eef3f8","#e2e9f1"],citynight:["#1d2240","#262c52"],northpole:["#e8eff6","#dbe4ee"],i4:["#5f9a40","#6aa64a"],bethlehem:["#c9a873","#d6b783"]};
+const XTHUMB={mountain:["#e9eef4","#dde5ee"],snow:["#eef3f8","#e2e9f1"],citynight:["#1d2240","#262c52"],northpole:["#e8eff6","#dbe4ee"],i4:["#5f9a40","#6aa64a"],bethlehem:["#c9a873","#d6b783"]};
 
 /* ---------------- BUILD A COURSE ---------------- */
 let skyStrip=null, skyGrad=null, fogGrad=null, mapBg=null, mapT=null;
@@ -1880,11 +2014,14 @@ const JUMPF=22;
 
 let WEAR_ARMOUR=false;
 function makeKart(r,veh,ai,slot,arm){
-  const ar = (!ai && (arm===undefined?WEAR_ARMOUR:arm)) ? {...r,look:{...r.look,armour:true}} : r;
-  const fr=[-1,0,1].map(l=>vehicleSprite(ar,veh,l));
-  const frB = ar.id==="ritchie" ? [-1,0,1].map(l=>vehicleSprite({...ar,look:{...ar.look,hat:null,shineHead:true}},veh,l)) : null;
+  const ar0 = (!ai && (arm===undefined?WEAR_ARMOUR:arm)) ? {...r,look:{...r.look,armour:true}} : r;
+  const santaOn = !ai && REWARD.santa && ((r===pick.racer&&pick.santa)||(r===pick2.racer&&pick2.santa));
+  const ar = santaOn ? {...ar0,look:{...ar0.look,santaSuit:true,armour:false}} : ar0;
+  const spr=(a,v,l)=>COURSE&&COURSE.jeeps?jeepSprite(a,l):vehicleSprite(a,v,l);
+  const fr=[-1,0,1].map(l=>spr(ar,veh,l));
+  const frB = ar.id==="ritchie" ? [-1,0,1].map(l=>spr({...ar,look:{...ar.look,hat:null,shineHead:true}},veh,l)) : null;
   const gi=N-6-Math.floor(slot/2)*3; const gp=TR[(gi+N)%N]; const lat=slot%2?12:-12;
-  const S0=effStats(r,veh), armed=ar!==r;
+  const S0=effStats(r,veh), armed=ar0!==r && !santaOn;
   // Gold Armour makes the racer HEAVIER. Kept separate from the official stats (S) so the fair-play
   // guard and the school leaderboard still see the real numbers. It never adds top speed.
   const W={ wf:clamp(S0.wf+(armed?.55:0),-1,1.5), bw:S0.heavy*(armed?1.6:1), armAcc:armed?.9:1, armTurn:armed?.96:1, armed };
@@ -1920,7 +2057,7 @@ function startRace(){
       x:p.x+p.nx*lat, y:p.y+p.ny*lat, a:p.ang, ma:p.ang, seg:si, prog:si-N}); c.S.off=1; CHASERS.push(c); }
   tt=null;
   if(mode==="tt"){ player.item="pass"; player.shineT=0; player.demerit=0;
-    const g = ghostPref==="off" ? null : ghostPref==="school" ? (pendingGhost||loadGhost(COURSE.id)) : loadGhost(COURSE.id); pendingGhost=null; if(g){ const gr=ROSTER.find(r=>r.id===g.r)||ROSTER[0]; g.img=vehicleSprite(gr,g.v||"kart",0); g.name=g.n||gr.name; }
+    const g = ghostPref==="off" ? null : ghostPref==="school" ? (pendingGhost||loadGhost(COURSE.id)) : loadGhost(COURSE.id); pendingGhost=null; if(g){ const gr=findRacer(g.r)||ROSTER[0]; g.img=vehicleSprite(gr,g.v||"kart",0); g.name=g.n||gr.name; }
     tt={passes:3, laps:[], lapStart:0, rec:[], f:0, ghost:g, gpos:null}; }
   if(tt && tt.ghost && tt.ghost.school) tt.ghost.name="SCHOOL RECORD · "+(tt.ghost.n||"");
   raceT=0; countT=4.4; finishT=0; frame=0; gasStartCount=null; camA=player.a; lastCount=5; flash=0; boltT=rnd(4,8);
@@ -2043,6 +2180,9 @@ function physics(k,inp){
   let grip=COURSE.grip||1; const kind=COURSE._kind?COURSE._kind[k.seg]:null;
   if(kind==="dirt" && !off){ grip=Math.min(grip,.5); if(k.v>1.4 && frame%3===0 && player && Math.hypot(k.x-player.x,k.y-player.y)<220) fx.push({img:SPR_IMG.dust,x:k.x-Math.cos(k.a)*5+rnd(-3,3),y:k.y-Math.sin(k.a)*5+rnd(-3,3),w:7,h:5,t:26,t0:26,smoke:true}); }
   if(COURSE._ice && COURSE._ice.length && !(k.air>0) && onIce(k.x,k.y)){ grip=Math.min(grip,.06); if(k===player && frame%40===0 && k.v>1.5) say("❄ ICE!",.6,true); }
+  if(COURSE._drifts && !(k.air>0) && !k.splash && inDrift(k.x,k.y)){ k.v*=.9; k.boost=0;
+    if(k===player && frame%50===0) say("❄ STUCK IN A SNOW DRIFT!",.8,true);
+    if(frame%5===0 && k.v>.3 && Math.hypot(k.x-player.x,k.y-player.y)<240) fx.push({img:SPR_IMG.x_puff,x:k.x+rnd(-4,4),y:k.y+rnd(-4,4),w:7,h:5,t:20}); }
   if(k.drift) grip=Math.min(grip,.13-.03*k.wf); if(k.shove>0){ k.shove--; grip=Math.min(grip,.35); } if(wet) grip*=.45; if(k.veh==="bike") grip*=1.25; if(k.boost>0) grip*=1.3;
   if(k.boat){ grip=Math.min(grip,.3+.05*k.wf);   // boats glide wide through the turns
     if(k.v>1 && frame%2===0 && player && Math.hypot(k.x-player.x,k.y-player.y)<220) fx.push({img:SPR_IMG.foam,x:k.x-Math.cos(k.a)*6+rnd(-2,2),y:k.y-Math.sin(k.a)*6+rnd(-2,2),w:6,h:4,t:30,t0:30,smoke:true}); }
@@ -2160,7 +2300,7 @@ function interact(){
         if((a===player||b===player)&&frame%10===0) SFX.bump(); } } }
   for(const d of DARTERS){ if(d.out<=0) continue;
     for(const k of karts){ if(k.splash||k.air>0||k.jump>3) continue; const dx=k.x-d.x, dy=k.y-d.y, dd=Math.hypot(dx,dy);
-      if(dd<9 && dd>0){ k.x=d.x+dx/dd*9; k.y=d.y+dy/dd*9; if(!k.gold){ if(k===player&&k.spin===0) SFX.honk(); hit(k,"CAR BACKING OUT!"); } } } }
+      if(dd<9 && dd>0){ k.x=d.x+dx/dd*9; k.y=d.y+dy/dd*9; if(!k.gold){ if(k===player&&k.spin===0) (d.msg?SFX.bump():SFX.honk()); hit(k,d.msg||"CAR BACKING OUT!"); } } } }
   for(const t of TRAFFIC){ const rr=t.r||(t.big?11:9);
     for(const k of karts){ if(k.splash||k.jump>3||k.air>4) continue; const dx=k.x-t.x, dy=k.y-t.y, d=Math.hypot(dx,dy);
       if(d<rr && d>0){ k.x=t.x+dx/d*rr; k.y=t.y+dy/d*rr; if(!k.gold){ if(k===player&&k.spin===0) SFX.honk(); hit(k,t.train?"TRAIN!":t.wrong?"WRONG-WAY DRIVER!":"TRAFFIC!"); } } } }
@@ -3032,7 +3172,7 @@ async function renderBallBoard(el,source,hl,data){
   if(!rows.length){ el.innerHTML=head+`<div class="lbNote">No matches yet on ${DIFF[dv].name} — be the first!</div>`; wire(); return; }
   const t=document.createElement("table"); t.className="lb";
   t.innerHTML=`<tr><th></th><th></th><th>NAME</th><th>RACER</th><th style="text-align:right">YOUR GOALS</th><th style="text-align:right">SCORE</th><th>DATE</th></tr>`;
-  rows.slice(0,50).forEach((e,i)=>{ const r=ROSTER.find(x=>x.id===e.r)||ROSTER[0]; const tr=document.createElement("tr");
+  rows.slice(0,50).forEach((e,i)=>{ const r=findRacer(e.r)||ROSTER[0]; const tr=document.createElement("tr");
     if(hl && e.n===hl.n && +e.g===hl.g && String(e.s)===hl.s) tr.className="me"; const d=e.d?new Date(e.d):null;
     tr.innerHTML=`<td class="p">${ord(i+1)}</td><td></td><td>${esc(e.n)}</td><td class="dim">${esc(r.name)}</td><td class="t">${+e.g}</td><td class="t">${esc(String(e.s))}${e.res==="W"?" W":e.res==="L"?" L":" D"}</td><td class="dim">${d&&!isNaN(d)?(d.getMonth()+1)+"/"+d.getDate():""}</td>`;
     tr.children[1].appendChild(face(r)); t.appendChild(tr); });
@@ -3090,7 +3230,7 @@ async function renderParkBoard(el,source,hl,data){
   if(!rows.length){ el.innerHTML=head+`<div class="lbNote">No scores yet — be the first!</div>`; return; }
   const t=document.createElement("table"); t.className="lb";
   t.innerHTML=`<tr><th></th><th></th><th>NAME</th><th>RACER</th><th style="text-align:right">PARKED</th><th style="text-align:right">SCORE</th><th>DATE</th></tr>`;
-  rows.slice(0,50).forEach((e,i)=>{ const r=ROSTER.find(x=>x.id===e.r)||ROSTER[0]; const tr=document.createElement("tr");
+  rows.slice(0,50).forEach((e,i)=>{ const r=findRacer(e.r)||ROSTER[0]; const tr=document.createElement("tr");
     if(hl && e.n===hl.n && e.s===hl.s) tr.className="me"; const d=e.d?new Date(e.d):null;
     tr.innerHTML=`<td class="p">${ord(i+1)}</td><td></td><td>${esc(e.n)}</td><td class="dim">${esc(r.name)}</td><td class="t">${e.c}</td><td class="t">${e.s}</td><td class="dim">${d&&!isNaN(d)?(d.getMonth()+1)+"/"+d.getDate():""}</td>`;
     tr.children[1].appendChild(face(r)); t.appendChild(tr); });
@@ -3118,7 +3258,7 @@ function render(){
     list.push({z:p.z,img:SPR_IMG.box[(frame>>3)%4],x:p.sx,y:p.sy-(4+bob)*p.sc,w:7*p.sc,h:7*p.sc}); }
   for(const e of EXTRA){ const p=proj(e.x,e.y); if(!p||p.z>1100||p.z<4) continue; list.push({z:p.z,img:e.img,x:p.sx,y:p.sy,lift:(e.lift||0)*p.sc,w:e.w*p.sc,h:e.h*p.sc}); }
   for(const t of TRAFFIC){ const p=proj(t.x,t.y); if(!p||p.z>800) continue; list.push({z:p.z,img:t.img,x:p.sx,y:p.sy,w:(t.w||(t.big?15:13))*p.sc,h:(t.h||(t.big?19:9))*p.sc,shadow:true}); }
-  for(const d of DARTERS){ const p=proj(d.x,d.y); if(!p||p.z>800) continue; list.push({z:p.z,img:d.img,x:p.sx,y:p.sy,w:13*p.sc,h:9*p.sc,shadow:true}); }
+  for(const d of DARTERS){ const p=proj(d.x,d.y); if(!p||p.z>800) continue; list.push({z:p.z,img:d.img,x:p.sx,y:p.sy,w:(d.w||13)*p.sc,h:(d.h||9)*p.sc,shadow:true}); }
   for(const a of ANIM){ const p=proj(a.x,a.y); if(!p||p.z>800||p.z<4) continue; list.push({z:p.z,img:a.img,x:p.sx,y:p.sy,lift:a.lift*p.sc,w:a.w*p.sc,h:a.h*p.sc,shadow:a.t==="ball"}); }
   for(const b of BALLS){ const p=proj(b.x,b.y); if(!p||p.z>700) continue; list.push({z:p.z,img:SPR_IMG.ball,x:p.sx,y:p.sy,lift:b.h*p.sc,w:5*p.sc,h:5*p.sc,shadow:true}); }
   for(const h of hazards){ const p=proj(h.x,h.y); if(!p||p.z>600) continue; list.push({z:p.z,img:SPR_IMG.tray,x:p.sx,y:p.sy,w:9*p.sc,h:5*p.sc}); }
@@ -3274,7 +3414,7 @@ function showResults(){
     const all=[player,...karts.filter(k=>k!==player)].map(k=>({k,p:cup.pts[k.r.id]||0})).sort((a,b)=>b.p-a.p);
     st.innerHTML=`<tr><th colspan="4">${HOLIDAY?"CHRISTMAS CUP":"LANCER CUP"} — ${cup.i<cup.courses.length?"AFTER RACE "+cup.i+" OF "+cup.courses.length:"FINAL STANDINGS"}</th></tr>`;
     all.forEach((r,i)=>{ const tr=document.createElement("tr"); if(r.k===player) tr.className="me"; tr.innerHTML=`<td class="p">${ord(i+1)}</td><td></td><td>${r.k.name}</td><td class="t">${r.p} pts</td>`; tr.children[1].appendChild(face(r.k.r)); st.appendChild(tr); });
-    if(cup.i>=cup.courses.length){ const champ=all[0].k===player; $("resHead").textContent=champ?"CUP CHAMPION!":"CUP COMPLETE"; if(champ){ SFX.win(); const wasLocked=!REWARD.cup; unlockSteed(); if(wasLocked){ setTimeout(()=>say("🏇 CUP WON! Royal Steed + Camelot Keep unlocked!",3.4,true),700); } }
+    if(cup.i>=cup.courses.length){ const champ=all[0].k===player; $("resHead").textContent=champ?"CUP CHAMPION!":"CUP COMPLETE"; if(champ){ SFX.win(); const wasLocked=!REWARD.cup; unlockSteed(); if(wasLocked){ setTimeout(()=>say("🏇 CUP WON! Royal Steed + Camelot Keep unlocked!",3.4,true),700); } } if(champ && HOLIDAY){ const wasS=!REWARD.santa; unlockSanta(); if(wasS) setTimeout(()=>say("🎅 CHRISTMAS CUP WON! Santa Suit + secret racer BLITZEN unlocked!",4,true),4400); }
       $("resSub").textContent= champ ? `${player.name} wins the ${HOLIDAY?"Christmas Cup":"Lancer Cup"} with ${all[0].p} points!` : `${all[0].k.name} wins the ${HOLIDAY?"Christmas Cup":"Lancer Cup"}. ${player.name} finished ${ord(all.findIndex(r=>r.k===player)+1)} overall.`; }
   }
   const more = cup && cup.i<cup.courses.length;
@@ -3325,7 +3465,7 @@ function boardTable(rows,hl){
   if(!rows.length) return `<div class="lbNote">No times yet — be the first!</div>`;
   const t=document.createElement("table"); t.className="lb";
   t.innerHTML=`<tr><th></th><th></th><th>NAME</th><th>RACER</th><th>RIDE</th><th style="text-align:right">TIME</th><th>DATE</th></tr>`;
-  rows.slice(0,50).forEach((e,i)=>{ const r=ROSTER.find(x=>x.id===e.r)||ROSTER[0]; const tr=document.createElement("tr");
+  rows.slice(0,50).forEach((e,i)=>{ const r=findRacer(e.r)||ROSTER[0]; const tr=document.createElement("tr");
     if(hl && e.n===hl.n && Math.abs(e.t-hl.t)<.006) tr.className="me";
     const d=e.d?new Date(e.d):null;
     tr.innerHTML=`<td class="p">${ord(i+1)}</td><td></td><td>${esc(e.n)}</td><td class="dim">${esc(r.name)}</td><td class="dim">${VEH[e.v]?VEH[e.v].name:""}</td><td class="t">${fmt(e.t)}</td><td class="dim">${d&&!isNaN(d)?(d.getMonth()+1)+"/"+d.getDate():""}</td>`;
@@ -3545,21 +3685,33 @@ const armoured=(r,on)=>on?{...r,look:{...r.look,armour:true}}:r;
 function buildSelectFor(pick){
   if(pick.veh==="horse" && !REWARD.cup) pick.veh="bike";           // safety: can't keep a locked ride
   if(pick.armour && !REWARD.gold) pick.armour=false;
+  if(pick.santa && !REWARD.santa) pick.santa=false;
+  if(pick.racer===BLITZEN && !REWARD.santa) pick.racer=ROSTER[0];
   const arm=REWARD.gold&&pick.armour;
+  const dress=r=>{ const a=armoured(r,arm); return (REWARD.santa&&pick.santa)?{...a,look:{...a.look,santaSuit:true,armour:false}}:a; };
   const grid=$("grid"); grid.innerHTML="";
   ROSTER.forEach(r=>{ const b=document.createElement("button"); b.className="card"+(r===pick.racer?" on":"");
     b.appendChild(face(r)); b.appendChild(document.createTextNode(r.name));
     b.onclick=()=>{ if(rolling) return; pick.racer=r; if(r.veh) pick.veh=r.veh; buildSelect(); SFX.item(); }; grid.appendChild(b); });
-  const pc=$("picked"); pc.innerHTML=""; const cv2=document.createElement("canvas"); cv2.width=48; cv2.height=48; cv2.getContext("2d").drawImage(vehicleSprite(armoured(pick.racer,arm),pick.veh,0),0,0);
+  if(HOLIDAY || REWARD.santa){ const r=BLITZEN, lock=!REWARD.santa, b=document.createElement("button"); b.className="card"+(r===pick.racer?" on":"")+(lock?" locked":"");
+    if(lock){ const c=document.createElement("canvas"); c.width=32; c.height=32; const q=c.getContext("2d"); q.fillStyle="#14213f"; q.fillRect(0,0,32,32); q.fillStyle="#ffd84a"; q.font="bold 22px Verdana"; q.textAlign="center"; q.fillText("?",16,24);
+      b.appendChild(c); b.appendChild(document.createTextNode("🔒 Win the Christmas Cup")); b.title="Win the Christmas Cup to unlock a secret racer!"; b.onclick=()=>{ SFX.buzz&&SFX.buzz(); }; }
+    else { b.appendChild(face(r)); b.appendChild(document.createTextNode(r.name)); b.onclick=()=>{ if(rolling) return; pick.racer=r; if(pick.veh==="cart") pick.veh="kart"; buildSelect(); SFX.item(); }; }
+    grid.appendChild(b); }
+  const pc=$("picked"); pc.innerHTML=""; const cv2=document.createElement("canvas"); cv2.width=48; cv2.height=48; cv2.getContext("2d").drawImage(vehicleSprite(dress(pick.racer),pick.veh,0),0,0);
   pc.appendChild(cv2); const d=document.createElement("div"); const pr=pick.racer.st, pip=(n,l)=>`<i class="pip ${n>0?"up":n<0?"dn":""}">${l} ${n>0?"+".repeat(n):n<0?"−".repeat(-n):"·"}</i>`;
   d.innerHTML=`<b>${pick.racer.name}</b><span>“${pick.racer.tag}” on the ${VEH[pick.veh].name}</span><div class="pips">${pip(pr[0],"SPD")}${pip(pr[1],"ACC")}${pip(pr[2],"HND")}${pip(pr[3],"WGT")}</div>${pick.racer.power?`<span class="power">★ ${pick.racer.power}</span>`:""}<span class="wtip">Heavy = higher top speed, wins bumps &amp; slides wide in drifts, but slow to start &amp; turn. Light = quick start &amp; sharp turns, but gets shoved around.</span>`; pc.appendChild(d);
   const vo=$("vehOpts"); vo.innerHTML="";
-  for(const v in VEH){ if(v==="horse" && !REWARD.cup) continue; const b=document.createElement("button"); b.className="opt"+(v===pick.veh?" on":""); const c=document.createElement("canvas"); c.width=48; c.height=48; c.getContext("2d").drawImage(vehicleSprite(armoured(pick.racer,arm),v,0),0,0);
+  for(const v in VEH){ if(v==="horse" && !REWARD.cup) continue; const b=document.createElement("button"); b.className="opt"+(v===pick.veh?" on":""); const c=document.createElement("canvas"); c.width=48; c.height=48; c.getContext("2d").drawImage(vehicleSprite(dress(pick.racer),v,0),0,0);
     b.appendChild(c); b.insertAdjacentHTML("beforeend",`<b>${VEH[v].name}</b><span>${VEH[v].desc}</span>`); b.onclick=()=>{ pick.veh=v; buildSelect(); }; vo.appendChild(b); }
   if(REWARD.gold){ const ab=document.createElement("button"); ab.className="opt"+(pick.armour?" on":""); const c=document.createElement("canvas"); c.width=48; c.height=48;
     c.getContext("2d").drawImage(portrait({...pick.racer,look:{...pick.racer.look,armour:true}}),0,0,48,48);
     ab.appendChild(c); ab.insertAdjacentHTML("beforeend",`<b>⚜ Gold Armour</b><span>${pick.armour?"ON — heavier: wins bumps, slower start":"Earned! Tap to wear (adds weight)"}</span>`);
-    ab.onclick=()=>{ pick.armour=!pick.armour; SFX.item&&SFX.item(); buildSelect(); }; vo.appendChild(ab); }
+    ab.onclick=()=>{ pick.armour=!pick.armour; if(pick.armour) pick.santa=false; SFX.item&&SFX.item(); buildSelect(); }; vo.appendChild(ab); }
+  if(REWARD.santa){ const sb=document.createElement("button"); sb.className="opt"+(pick.santa?" on":""); const c=document.createElement("canvas"); c.width=48; c.height=48;
+    c.getContext("2d").drawImage(portrait({...pick.racer,look:{...pick.racer.look,santaSuit:true}}),0,0,48,48);
+    sb.appendChild(c); sb.insertAdjacentHTML("beforeend",`<b>🎅 Santa Suit</b><span>${pick.santa?"ON — ho ho ho!":"Earned! Tap to wear"}</span>`);
+    sb.onclick=()=>{ pick.santa=!pick.santa; if(pick.santa) pick.armour=false; SFX.item&&SFX.item(); buildSelect(); }; vo.appendChild(sb); }
   const S=effStats(pick.racer,pick.veh); const bar=(v)=>`<div class="bar"><i style="width:${Math.round(clamp(v,0,1)*100)}%"></i></div>`;
   $("vehStats").innerHTML=`<span>Speed</span>${bar((S.max-2.85)/0.7)}<span>Acceleration</span>${bar((S.acc-.035)/.06)}<span>Handling</span>${bar((S.turn-.034)/.024)}<span>Off-road/Wet</span>${bar(S.off/.8)}<span>Weight${arm?" ⚜":""}</span>${bar(S.heavy*(arm?1.6:1)/2.6)}`;
   const dopts=$("diffOpts"); dopts.innerHTML="";
@@ -3743,7 +3895,7 @@ function loop(now){
   setRain(racing && !paused && !muted && !!COURSE.rain);
   setScreech(racing && !paused && state==="race" && player && player.drift);
   const hurry = mode==="soccer" ? (state==="race" && (soccer.ot || soccer.left<15)) : mode==="battle" ? (state==="race" && raceT>BATTLE_TIME-30) : mode==="park" ? (state==="race" && park && park.misses>=2) : (state==="race" && player && player.maxLap>=LAPS-1);
-  updateMusic(racing ? (state==="done"?null:COURSE.theme) : "menu", hurry ? 1.12 : 1);
+  updateMusic(racing ? (state==="done"?null:(COURSE.music||COURSE.theme)) : "menu", hurry ? 1.12 : 1);
   requestAnimationFrame(loop);
 }
 buildCourse(COURSES[0]);
