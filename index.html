@@ -162,6 +162,7 @@ table.lb canvas{width:2.6cqw;vertical-align:middle;image-rendering:pixelated;bor
 #title.xmas::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(#fff 1.4px,transparent 2px),radial-gradient(rgba(255,255,255,.8) 1px,transparent 1.6px);background-size:64px 64px,38px 38px;animation:xsnow 10s linear infinite;opacity:.85}
 @keyframes xsnow{from{background-position:0 0,0 0}to{background-position:40px 640px,-24px 380px}}
 #title.xmas .logo{color:#ff5a4a;text-shadow:0 .4cqw 0 #2f7d32}
+#bRoyale{display:block;margin:1.2cqh auto 0;font-size:1.7cqw;padding:.6cqw 1.6cqw;background:#1f6fb8;color:#fff;border-color:#bfe9ff}
 #bSeason{display:block;margin:1.2cqh auto 0;font-size:1.7cqw;padding:.6cqw 1.6cqw;background:#2f7d32;color:#fff;border-color:#c0182e}
 #seasonTabs .mtab{font-size:1.2cqw;padding:.3cqw 1.1cqw}
 </style>
@@ -196,6 +197,7 @@ table.lb canvas{width:2.6cqw;vertical-align:middle;image-rendering:pixelated;bor
     <canvas id="titleKart" width="240" height="80"></canvas>
     <button class="btn" id="bStart">START YOUR ENGINES</button>
     <button class="btn alt" id="bSeason">🎄 SEASON 2: CHRISTMAS IN LANCERVILLE</button>
+    <button class="btn alt" id="bRoyale">❄️ LANCER ROYALE — SNOWBALL SHOWDOWN</button>
     <div class="verse" id="titleVerse">“Run in such a way as to get the prize.” — 1 Corinthians 9:24</div>
   </div>
 
@@ -4374,6 +4376,7 @@ function setSeason(on){
 $("viewBtn").onclick=()=>{ audioInit(); setView(!FP); }; setView(lsGet("lancerkart_fp",0));
 $("bBook").onclick=()=>openCritterBook();
 $("bSeason").onclick=()=>{ audioInit(); setSeason(!HOLIDAY); };
+$("bRoyale").onclick=()=>{ location.href="royale.html"; };
 $("sS1").onclick=()=>{ if(HOLIDAY) setSeason(false); };
 $("sS2").onclick=()=>{ if(!HOLIDAY) setSeason(true); };
 $("mDeliver").onclick=()=>{ mode="deliver"; buildCourseCards(); };
